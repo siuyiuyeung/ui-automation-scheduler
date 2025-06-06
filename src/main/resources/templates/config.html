@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration Details - UI Automation Scheduler</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">UI Automation Scheduler</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">Dashboard</a>
+                <a class="nav-link" href="/history">History</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0" th:text="${config.name}">Configuration Details</h4>
+                        <div>
+                            <button class="btn btn-primary" onclick="runNow()">Run Now</button>
+                            <button class="btn btn-secondary" onclick="toggleActive()" th:text="${config.active ? 'Deactivate' : 'Activate'}">Toggle Active</button>
+                            <button class="btn btn-danger" onclick="deleteConfig()">Delete</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form id="configForm">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="name" th:value="${config.name}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" rows="2" th:text="${config.description}"></textarea>
+                            </div>
+
+                            <h5>Steps</h5>
+                            <div id="stepsContainer">
+                                <div th:each="step, stepStat : ${config.steps}" class="card mb-2">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <select class="form-select step-type" th:value="${step.type}">
+                                                    <option value="NAVIGATE">Navigate</option>
+                                                    <option value="CLICK">Click</option>
+                                                    <option value="INPUT">Input</option>
+                                                    <option value="WAIT">Wait</option>
+                                                    <option value="SCREENSHOT">Screenshot</option>
+                                                    <option value="SCROLL">Scroll</option>
+                                                    <option value="SELECT">Select</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <div th:switch="${step.type}">
+                                                    <div th:case="'NAVIGATE'">
+                                                        <input type="text" class="form-control" placeholder="URL" th:value="${step.value}">
+                                                    </div>
+                                                    <div th:case="'CLICK'">
+                                                        <input type="text" class="form-control" placeholder="CSS Selector" th:value="${step.selector}">
+                                                    </div>
+                                                    <div th:case="'INPUT'">
+                                                        <input type="text" class="form-control mb-2" placeholder="CSS Selector" th:value="${step.selector}">
+                                                        <input type="text" class="form-control" placeholder="Text to input" th:value="${step.value}">
+                                                    </div>
+                                                    <div th:case="'WAIT'">
+                                                        <input type="number" class="form-control" placeholder="Seconds" th:value="${step.waitSeconds}">
+                                                    </div>
+                                                    <div th:case="'SCREENSHOT'">
+                                                        <input type="text" class="form-control" placeholder="CSS Selector (optional)" th:value="${step.captureSelector}">
+                                                    </div>
+                                                    <div th:case="'SCROLL'">
+                                                        <input type="number" class="form-control" placeholder="Scroll position (pixels)" th:value="${step.value}">
+                                                    </div>
+                                                    <div th:case="'SELECT'">
+                                                        <input type="text" class="form-control mb-2" placeholder="CSS Selector" th:value="${step.selector}">
+                                                        <input type="text" class="form-control" placeholder="Option value" th:value="${step.value}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-1">
+                                                <button type="button" class="btn btn-sm btn-danger" onclick="removeStep(this)">X</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-secondary mb-3" onclick="addStep()">Add Step</button>
+
+                            <h5>Schedule</h5>
+                            <div class="mb-3">
+                                <label for="scheduleType" class="form-label">Schedule Type</label>
+                                <select class="form-select" id="scheduleType" onchange="updateScheduleFields()">
+                                    <option value="">No Schedule (Manual Only)</option>
+                                    <option value="ONCE" th:selected="${config.schedule?.type == 'ONCE'}">Run Once</option>
+                                    <option value="INTERVAL" th:selected="${config.schedule?.type == 'INTERVAL'}">Interval</option>
+                                    <option value="CRON" th:selected="${config.schedule?.type == 'CRON'}">Cron Expression</option>
+                                </select>
+                            </div>
+                            <div id="scheduleFields">
+                                <div th:if="${config.schedule != null}" th:switch="${config.schedule.type}">
+                                    <div th:case="'ONCE'">
+                                        <input type="datetime-local" class="form-control" id="runOnceAt" th:value="${config.schedule.runOnceAt}">
+                                    </div>
+                                    <div th:case="'INTERVAL'">
+                                        <input type="number" class="form-control" id="intervalMinutes" placeholder="Minutes" th:value="${config.schedule.intervalMinutes}">
+                                    </div>
+                                    <div th:case="'CRON'">
+                                        <input type="text" class="form-control" id="cronExpression" placeholder="0 0 * * * ?" th:value="${config.schedule.cronExpression}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                <a href="/" class="btn btn-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/config.js"></script>
+</body>
+</html> 

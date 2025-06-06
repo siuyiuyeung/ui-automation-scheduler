@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - UI Automation Scheduler</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">UI Automation Scheduler</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link active" href="/">Dashboard</a>
+                <a class="nav-link" href="/history">History</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Summary Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Configurations</h5>
+                        <h2 class="card-text" th:text="${stats.totalConfigs}">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Active Configurations</h5>
+                        <h2 class="card-text" th:text="${stats.activeConfigs}">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Executions Today</h5>
+                        <h2 class="card-text" th:text="${stats.executionsToday}">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-dark">
+                    <div class="card-body">
+                        <h5 class="card-title">Success Rate</h5>
+                        <h2 class="card-text" th:text="${stats.successRate + '%'}">0%</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configurations -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Automation Configurations</h4>
+                <a href="/config/new" class="btn btn-primary">Create New</a>
+            </div>
+            <div class="card-body">
+                <div class="row" id="configsList">
+                    <div class="col-md-4 mb-3" th:each="config : ${configs}">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title" th:text="${config.name}">Config Name</h5>
+                                <p class="card-text" th:text="${config.description ?: 'No description'}">Description</p>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        Status: <span th:text="${config.active ? 'Active' : 'Inactive'}">Status</span>
+                                    </small>
+                                </p>
+                                <div class="btn-group">
+                                    <a th:href="@{/config/{id}(id=${config.id})}" class="btn btn-sm btn-secondary">Edit</a>
+                                    <button class="btn btn-sm btn-primary" th:onclick="'runNow(' + ${config.id} + ')'">Run Now</button>
+                                    <button class="btn btn-sm btn-info" th:onclick="'toggleActive(' + ${config.id} + ')'"
+                                            th:text="${config.active ? 'Deactivate' : 'Activate'}">Toggle</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Executions -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Recent Executions</h4>
+                <a href="/history" class="btn btn-secondary">View All</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Config Name</th>
+                                <th>Status</th>
+                                <th>Start Time</th>
+                                <th>Duration</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="result : ${recentResults}">
+                                <td th:text="${result.config.name}">Config Name</td>
+                                <td>
+                                    <span th:class="'badge bg-' + ${result.status == 'SUCCESS' ? 'success' : 
+                                                                    result.status == 'FAILED' ? 'danger' : 
+                                                                    result.status == 'RUNNING' ? 'primary' : 'secondary'}"
+                                          th:text="${result.status}">Status</span>
+                                </td>
+                                <td th:text="${#temporals.format(result.startTime, 'yyyy-MM-dd HH:mm:ss')}">Start Time</td>
+                                <td th:text="${result.endTime != null ? 
+                                            #temporals.duration(result.startTime, result.endTime).getSeconds() + 's' : 
+                                            'Running...'}">Duration</td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" th:onclick="'viewDetails(' + ${result.id} + ')'">Details</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Details Modal -->
+        <div class="modal fade" id="resultModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Execution Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <h6>Logs</h6>
+                            <pre class="bg-light p-3" id="resultLogs"></pre>
+                        </div>
+                        <div class="mb-3">
+                            <h6>Screenshots</h6>
+                            <div id="screenshotGallery" class="row"></div>
+                        </div>
+                        <div id="errorMessage" class="alert alert-danger" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/dashboard.js"></script>
+</body>
+</html> 
