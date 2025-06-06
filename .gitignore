@@ -1,0 +1,54 @@
+# Compiled class file
+*.class
+
+# Log files
+*.log
+logs/
+*.log.gz
+
+# Database files
+data/
+*.db
+*.mv.db
+*.trace.db
+
+# Package Files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+mvnw
+mvnw.cmd
+
+# IDE files
+.idea/
+*.iws
+*.iml
+*.ipr
+.project
+.classpath
+.settings/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Application specific
+ssh-configs-export.zip
+backup/
