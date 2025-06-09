@@ -111,6 +111,11 @@ ui-automation-scheduler/
          <version>${selenium.version}</version>
       </dependency>
       <dependency>
+         <groupId>org.seleniumhq.selenium</groupId>
+         <artifactId>selenium-devtools-v129</artifactId>
+         <version>${selenium.version}</version>
+      </dependency>
+      <dependency>
          <groupId>io.github.bonigarcia</groupId>
          <artifactId>webdrivermanager</artifactId>
          <version>5.8.0</version>
@@ -271,6 +276,7 @@ public class AutomationResult {
     private AutomationConfig config;
     
     @Enumerated(EnumType.STRING)
+    @Column(length = 20)
     private Status status;
     
     @Column(name = "start_time")
@@ -279,14 +285,16 @@ public class AutomationResult {
     @Column(name = "end_time")
     private LocalDateTime endTime;
     
-    @Column(columnDefinition = "TEXT")
+    @Lob
+    @Column(name = "logs")
     private String logs;
     
     @ElementCollection
     @CollectionTable(name = "result_screenshots")
     private List<String> screenshotPaths;
     
-    @Column(name = "error_message", columnDefinition = "TEXT")
+    @Lob
+    @Column(name = "error_message")
     private String errorMessage;
     
     public enum Status {
@@ -385,6 +393,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Service
 public class WebDriverService {
@@ -396,14 +408,45 @@ public class WebDriverService {
     private boolean headless;
     
     public WebDriver createDriver() {
+        // Suppress CDP version warnings
+        Logger.getLogger("org.openqa.selenium").setLevel(Level.WARNING);
+        System.setProperty("webdriver.chrome.silentOutput", "true");
+        
+        // Setup ChromeDriver using WebDriverManager
         WebDriverManager.chromedriver().setup();
+        
         ChromeOptions options = new ChromeOptions();
         
         if (headless) {
-            options.addArguments("--headless");
+            options.addArguments("--headless=new");
         }
+        
+        // Common Chrome options for stability
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--disable-blink-features=AutomationControlled");
+        options.addArguments("--disable-extensions");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--disable-web-security");
+        options.addArguments("--window-size=1920,1080");
+        
+        // Disable automation info bar
+        options.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
+        options.setExperimentalOption("useAutomationExtension", false);
+        
+        // Prefs to disable notifications and other popups
+        Map<String, Object> prefs = new HashMap<>();
+        prefs.put("credentials_enable_service", false);
+        prefs.put("profile.password_manager_enabled", false);
+        prefs.put("profile.default_content_setting_values.notifications", 2);
+        options.setExperimentalOption("prefs", prefs);
+        
+        // Set page load strategy
+        options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
+        
+        // Disable logs
+        options.addArguments("--log-level=3");
+        options.addArguments("--silent");
         
         return new ChromeDriver(options);
     }
@@ -414,9 +457,20 @@ public class WebDriverService {
         Files.createDirectories(path.getParent());
         
         if (selector != null && !selector.isEmpty()) {
-            WebElement element = driver.findElement(By.cssSelector(selector));
-            File screenshot = element.getScreenshotAs(OutputType.FILE);
-            Files.copy(screenshot.toPath(), path);
+            try {
+                WebElement element = driver.findElement(By.cssSelector(selector));
+                // Scroll element into view before taking screenshot
+                ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", element);
+                Thread.sleep(500); // Small delay to ensure element is in view
+                
+                File screenshot = element.getScreenshotAs(OutputType.FILE);
+                Files.copy(screenshot.toPath(), path);
+            } catch (NoSuchElementException e) {
+                // If element not found, take full page screenshot
+                TakesScreenshot takesScreenshot = (TakesScreenshot) driver;
+                File screenshot = takesScreenshot.getScreenshotAs(OutputType.FILE);
+                Files.copy(screenshot.toPath(), path);
+            }
         } else {
             TakesScreenshot takesScreenshot = (TakesScreenshot) driver;
             File screenshot = takesScreenshot.getScreenshotAs(OutputType.FILE);
@@ -429,6 +483,11 @@ public class WebDriverService {
     public void waitForElement(WebDriver driver, String selector, int timeout) {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeout));
         wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(selector)));
+    }
+    
+    public void waitForElementClickable(WebDriver driver, String selector, int timeout) {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeout));
+        wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(selector)));
     }
 }
 ```
@@ -935,14 +994,14 @@ automation:
     headless: false
     timeout: 30
 
-server:
-  port: 8080
-
+# Suppress Selenium CDP warnings
 logging:
   level:
     com.automation: DEBUG
     org.springframework.web: INFO
     org.hibernate: WARN
+    org.openqa.selenium.devtools: OFF
+    org.openqa.selenium.chromium: OFF
 ```
 
 ## 8. DTOs

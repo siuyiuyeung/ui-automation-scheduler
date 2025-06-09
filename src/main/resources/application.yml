@@ -29,11 +29,11 @@ automation:
     headless: false
     timeout: 30
 
-server:
-  port: 8080
-
+# Suppress Selenium CDP warnings
 logging:
   level:
     com.automation: DEBUG
     org.springframework.web: INFO
     org.hibernate: WARN
+    org.openqa.selenium.devtools: OFF
+    org.openqa.selenium.chromium: OFF
