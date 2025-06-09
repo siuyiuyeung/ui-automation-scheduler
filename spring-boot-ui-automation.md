@@ -52,101 +52,97 @@ ui-automation-scheduler/
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.0</version>
-        <relativePath/>
-    </parent>
-    
-    <groupId>com.automation</groupId>
-    <artifactId>ui-automation-scheduler</artifactId>
-    <version>1.0.0</version>
-    <name>UI Automation Scheduler</name>
-    
-    <properties>
-        <java.version>24</java.version>
-        <selenium.version>4.20.0</selenium.version>
-    </properties>
-    
-    <dependencies>
-        <!-- Spring Boot Starters -->
-        <dependency>
+   <modelVersion>4.0.0</modelVersion>
+
+   <parent>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-parent</artifactId>
+      <version>3.3.0</version>
+      <relativePath/>
+   </parent>
+
+   <groupId>com.automation</groupId>
+   <artifactId>ui-automation-scheduler</artifactId>
+   <version>1.0.0</version>
+   <name>UI Automation Scheduler</name>
+
+   <properties>
+      <java.version>24</java.version>
+      <selenium.version>4.20.0</selenium.version>
+   </properties>
+
+   <dependencies>
+      <!-- Spring Boot Starters -->
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-web</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-data-jpa</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-thymeleaf</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-validation</artifactId>
+      </dependency>
+
+      <!-- No Quartz dependency needed, using Spring's built-in scheduling -->
+
+      <!-- Database -->
+      <dependency>
+         <groupId>com.h2database</groupId>
+         <artifactId>h2</artifactId>
+         <scope>runtime</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.postgresql</groupId>
+         <artifactId>postgresql</artifactId>
+         <scope>runtime</scope>
+      </dependency>
+
+      <!-- Selenium -->
+      <dependency>
+         <groupId>org.seleniumhq.selenium</groupId>
+         <artifactId>selenium-java</artifactId>
+         <version>${selenium.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>io.github.bonigarcia</groupId>
+         <artifactId>webdrivermanager</artifactId>
+         <version>5.8.0</version>
+      </dependency>
+
+      <!-- Utilities -->
+      <dependency>
+         <groupId>org.projectlombok</groupId>
+         <artifactId>lombok</artifactId>
+         <optional>true</optional>
+      </dependency>
+      <dependency>
+         <groupId>com.fasterxml.jackson.datatype</groupId>
+         <artifactId>jackson-datatype-jsr310</artifactId>
+      </dependency>
+
+      <!-- Test -->
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-test</artifactId>
+         <scope>test</scope>
+      </dependency>
+   </dependencies>
+
+   <build>
+      <plugins>
+         <plugin>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-validation</artifactId>
-        </dependency>
-        
-        <!-- Scheduling -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-quartz</artifactId>
-        </dependency>
-        
-        <!-- Database -->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        
-        <!-- Selenium -->
-        <dependency>
-            <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-java</artifactId>
-            <version>${selenium.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.bonigarcia</groupId>
-            <artifactId>webdrivermanager</artifactId>
-            <version>5.8.0</version>
-        </dependency>
-        
-        <!-- Utilities -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-        </dependency>
-        
-        <!-- Test -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-    
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+         </plugin>
+      </plugins>
+   </build>
 </project>
 ```
 
@@ -229,10 +225,13 @@ public class AutomationStep {
     private int order;
     
     @Enumerated(EnumType.STRING)
+    @Column(length = 20)
     private StepType type;
     
+    @Column(name = "selector")
     private String selector; // CSS selector or XPath
     
+    @Column(name = "input_value")
     private String value; // Input value or URL
     
     @Column(name = "wait_seconds")
@@ -443,6 +442,7 @@ import com.automation.repository.AutomationResultRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
@@ -532,7 +532,7 @@ public class AutomationService {
                 break;
                 
             case SCROLL:
-                driver.executeScript("window.scrollTo(0, " + step.getValue() + ")");
+                ((JavascriptExecutor) driver).executeScript("window.scrollTo(0, " + step.getValue() + ")");
                 logs.append("Scrolled to position: ").append(step.getValue()).append("\n");
                 break;
                 
@@ -565,29 +565,40 @@ import com.automation.model.ScheduleConfig;
 import com.automation.repository.AutomationConfigRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.quartz.*;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.support.CronExpression;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
+import jakarta.annotation.PreDestroy;
+import java.time.*;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class SchedulerService {
     
-    private final Scheduler scheduler;
+    private final TaskScheduler taskScheduler;
+    private final AutomationService automationService;
     private final AutomationConfigRepository configRepository;
+    
+    // Map to store scheduled tasks
+    private final Map<Long, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
     
     @PostConstruct
     public void init() {
-        try {
-            scheduler.start();
-            scheduleActiveAutomations();
-        } catch (SchedulerException e) {
-            log.error("Failed to start scheduler", e);
-        }
+        log.info("Initializing scheduler service");
+        scheduleActiveAutomations();
+    }
+    
+    @PreDestroy
+    public void cleanup() {
+        log.info("Cleaning up scheduled tasks");
+        scheduledTasks.values().forEach(task -> task.cancel(false));
+        scheduledTasks.clear();
     }
     
     public void scheduleActiveAutomations() {
@@ -599,99 +610,95 @@ public class SchedulerService {
             return;
         }
         
+        // Cancel existing schedule if any
+        unscheduleAutomation(config.getId());
+        
         try {
-            JobDetail jobDetail = JobBuilder.newJob(AutomationJob.class)
-                .withIdentity("automation-" + config.getId())
-                .usingJobData("configId", config.getId())
-                .build();
+            ScheduledFuture<?> scheduledTask = null;
+            ScheduleConfig schedule = config.getSchedule();
             
-            Trigger trigger = createTrigger(config.getSchedule(), "trigger-" + config.getId());
+            Runnable task = () -> {
+                log.info("Executing scheduled automation: " + config.getName());
+                automationService.executeAutomation(config);
+            };
             
-            if (scheduler.checkExists(jobDetail.getKey())) {
-                scheduler.deleteJob(jobDetail.getKey());
+            switch (schedule.getType()) {
+                case ONCE:
+                    LocalDateTime runTime = LocalDateTime.parse(schedule.getRunOnceAt());
+                    Instant instant = runTime.atZone(ZoneId.systemDefault()).toInstant();
+                    scheduledTask = taskScheduler.schedule(task, instant);
+                    log.info("Scheduled one-time automation '{}' at {}", config.getName(), runTime);
+                    break;
+                    
+                case INTERVAL:
+                    Duration interval = Duration.ofMinutes(schedule.getIntervalMinutes());
+                    scheduledTask = taskScheduler.scheduleAtFixedRate(task, Instant.now(), interval);
+                    log.info("Scheduled interval automation '{}' every {} minutes", 
+                            config.getName(), schedule.getIntervalMinutes());
+                    break;
+                    
+                case CRON:
+                    if (isValidCronExpression(schedule.getCronExpression())) {
+                        CronTrigger cronTrigger = new CronTrigger(schedule.getCronExpression());
+                        scheduledTask = taskScheduler.schedule(task, cronTrigger);
+                        log.info("Scheduled cron automation '{}' with expression: {}", 
+                                config.getName(), schedule.getCronExpression());
+                    } else {
+                        log.error("Invalid cron expression for config {}: {}", 
+                                config.getName(), schedule.getCronExpression());
+                        return;
+                    }
+                    break;
+                    
+                default:
+                    log.warn("Unknown schedule type: " + schedule.getType());
+                    return;
             }
             
-            scheduler.scheduleJob(jobDetail, trigger);
-            log.info("Scheduled automation: " + config.getName());
+            if (scheduledTask != null) {
+                scheduledTasks.put(config.getId(), scheduledTask);
+            }
             
         } catch (Exception e) {
             log.error("Failed to schedule automation: " + config.getName(), e);
         }
     }
     
-    private Trigger createTrigger(ScheduleConfig schedule, String triggerId) {
-        TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger()
-            .withIdentity(triggerId);
-        
-        switch (schedule.getType()) {
-            case ONCE:
-                LocalDateTime runTime = LocalDateTime.parse(schedule.getRunOnceAt());
-                Date runDate = Date.from(runTime.atZone(ZoneId.systemDefault()).toInstant());
-                return triggerBuilder.startAt(runDate).build();
-                
-            case INTERVAL:
-                return triggerBuilder
-                    .withSchedule(SimpleScheduleBuilder.simpleSchedule()
-                        .withIntervalInMinutes(schedule.getIntervalMinutes())
-                        .repeatForever())
-                    .build();
-                
-            case CRON:
-                return triggerBuilder
-                    .withSchedule(CronScheduleBuilder.cronSchedule(schedule.getCronExpression()))
-                    .build();
-                
-            default:
-                throw new IllegalArgumentException("Unknown schedule type: " + schedule.getType());
-        }
-    }
-    
     public void unscheduleAutomation(Long configId) {
-        try {
-            JobKey jobKey = new JobKey("automation-" + configId);
-            if (scheduler.checkExists(jobKey)) {
-                scheduler.deleteJob(jobKey);
-                log.info("Unscheduled automation with id: " + configId);
-            }
-        } catch (SchedulerException e) {
-            log.error("Failed to unschedule automation: " + configId, e);
+        ScheduledFuture<?> scheduledTask = scheduledTasks.remove(configId);
+        if (scheduledTask != null) {
+            scheduledTask.cancel(false);
+            log.info("Unscheduled automation with id: " + configId);
         }
     }
-}
-```
-
-### AutomationJob.java
-```java
-package com.automation.service;
-
-import com.automation.model.AutomationConfig;
-import com.automation.repository.AutomationConfigRepository;
-import lombok.extern.slf4j.Slf4j;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-@Component
-@Slf4j
-public class AutomationJob implements Job {
     
-    @Autowired
-    private AutomationService automationService;
+    public void rescheduleAutomation(AutomationConfig config) {
+        unscheduleAutomation(config.getId());
+        if (config.isActive() && config.getSchedule() != null) {
+            scheduleAutomation(config);
+        }
+    }
     
-    @Autowired
-    private AutomationConfigRepository configRepository;
+    public boolean isScheduled(Long configId) {
+        return scheduledTasks.containsKey(configId) && 
+               !scheduledTasks.get(configId).isCancelled();
+    }
     
-    @Override
-    public void execute(JobExecutionContext context) {
-        Long configId = context.getJobDetail().getJobDataMap().getLong("configId");
-        log.info("Executing scheduled automation for config id: " + configId);
-        
-        configRepository.findById(configId).ifPresent(config -> {
-            if (config.isActive()) {
-                automationService.executeAutomation(config);
-            }
+    public Map<Long, Boolean> getScheduledStatus() {
+        Map<Long, Boolean> status = new ConcurrentHashMap<>();
+        scheduledTasks.forEach((configId, future) -> {
+            status.put(configId, !future.isCancelled() && !future.isDone());
         });
+        return status;
+    }
+    
+    private boolean isValidCronExpression(String cronExpression) {
+        try {
+            CronExpression.parse(cronExpression);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 }
 ```
@@ -711,7 +718,9 @@ import com.automation.service.SchedulerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/automation")
@@ -767,10 +776,7 @@ public class AutomationController {
                 AutomationConfig saved = configRepository.save(config);
                 
                 // Reschedule if needed
-                schedulerService.unscheduleAutomation(id);
-                if (saved.isActive() && saved.getSchedule() != null) {
-                    schedulerService.scheduleAutomation(saved);
-                }
+                schedulerService.rescheduleAutomation(saved);
                 
                 return ResponseEntity.ok(saved);
             })
@@ -793,6 +799,21 @@ public class AutomationController {
             .map(config -> {
                 AutomationResult result = automationService.executeAutomation(config);
                 return ResponseEntity.ok(result);
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+    
+    @GetMapping("/configs/{id}/toggle")
+    public ResponseEntity<Map<String, Object>> getScheduleStatus(@PathVariable Long id) {
+        return configRepository.findById(id)
+            .map(config -> {
+                Map<String, Object> status = new HashMap<>();
+                status.put("configId", id);
+                status.put("configName", config.getName());
+                status.put("isActive", config.isActive());
+                status.put("isScheduled", schedulerService.isScheduled(id));
+                status.put("schedule", config.getSchedule());
+                return ResponseEntity.ok(status);
             })
             .orElse(ResponseEntity.notFound().build());
     }
@@ -900,27 +921,12 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
+        globally_quoted_identifiers: true
   
   h2:
     console:
       enabled: true
       path: /h2-console
-  
-  quartz:
-    job-store-type: jdbc
-    properties:
-      org:
-        quartz:
-          scheduler:
-            instanceName: AutomationScheduler
-            instanceId: AUTO
-          jobStore:
-            driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
-            useProperties: false
-            tablePrefix: QRTZ_
-            isClustered: false
-          threadPool:
-            threadCount: 10
 
 automation:
   screenshot:
@@ -1019,20 +1025,23 @@ package com.automation.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.quartz.SchedulerFactoryBean;
-import javax.sql.DataSource;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 @Configuration
+@EnableScheduling
 public class SchedulerConfig {
     
     @Bean
-    public SchedulerFactoryBean schedulerFactoryBean(DataSource dataSource) {
-        SchedulerFactoryBean factory = new SchedulerFactoryBean();
-        factory.setDataSource(dataSource);
-        factory.setAutoStartup(true);
-        factory.setWaitForJobsToCompleteOnShutdown(true);
-        factory.setOverwriteExistingJobs(true);
-        return factory;
+    public TaskScheduler taskScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(10);
+        scheduler.setThreadNamePrefix("automation-scheduler-");
+        scheduler.setWaitForTasksToCompleteOnShutdown(true);
+        scheduler.setAwaitTerminationSeconds(30);
+        scheduler.initialize();
+        return scheduler;
     }
 }
 ```
@@ -1427,32 +1436,32 @@ setInterval(loadHistory, 10000);
 ### static/css/style.css
 ```css
 body {
-    background-color: #f8f9fa;
+   background-color: #f8f9fa;
 }
 
 .card {
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    transition: transform 0.2s;
+   box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+   transition: transform 0.2s;
 }
 
 .card:hover {
-    transform: translateY(-5px);
+   transform: translateY(-5px);
 }
 
 .navbar-brand {
-    font-weight: bold;
+   font-weight: bold;
 }
 
 #stepsContainer .card {
-    background-color: #f1f3f5;
+   background-color: #f1f3f5;
 }
 
 .table {
-    background-color: white;
+   background-color: white;
 }
 
 .badge {
-    padding: 0.5em 1em;
+   padding: 0.5em 1em;
 }
 ```
 

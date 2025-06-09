@@ -18,6 +18,7 @@ public class AutomationResult {
     private AutomationConfig config;
     
     @Enumerated(EnumType.STRING)
+    @Column(length = 20)
     private Status status;
     
     @Column(name = "start_time")
@@ -26,14 +27,16 @@ public class AutomationResult {
     @Column(name = "end_time")
     private LocalDateTime endTime;
     
-    @Column(columnDefinition = "TEXT")
+    @Lob
+    @Column(name = "logs")
     private String logs;
     
     @ElementCollection
     @CollectionTable(name = "result_screenshots")
     private List<String> screenshotPaths;
-    
-    @Column(name = "error_message", columnDefinition = "TEXT")
+
+    @Lob
+    @Column(name = "error_message")
     private String errorMessage;
     
     public enum Status {

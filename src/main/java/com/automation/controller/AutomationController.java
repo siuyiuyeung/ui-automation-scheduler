@@ -9,29 +9,31 @@ import com.automation.service.SchedulerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/automation")
 @RequiredArgsConstructor
 public class AutomationController {
-    
+
     private final AutomationConfigRepository configRepository;
     private final AutomationService automationService;
     private final SchedulerService schedulerService;
-    
+
     @GetMapping("/configs")
     public List<AutomationConfig> getAllConfigs() {
         return configRepository.findAll();
     }
-    
+
     @GetMapping("/configs/{id}")
     public ResponseEntity<AutomationConfig> getConfig(@PathVariable Long id) {
         return configRepository.findById(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
-    
+
     @PostMapping("/configs")
     public ResponseEntity<AutomationConfig> createConfig(@RequestBody AutomationConfigDTO dto) {
         AutomationConfig config = new AutomationConfig();
@@ -41,40 +43,37 @@ public class AutomationController {
         config.setSteps(dto.getSteps());
         config.setSchedule(dto.getSchedule());
         config.setActive(dto.isActive());
-        
+
         AutomationConfig saved = configRepository.save(config);
-        
+
         if (saved.isActive() && saved.getSchedule() != null) {
             schedulerService.scheduleAutomation(saved);
         }
-        
+
         return ResponseEntity.ok(saved);
     }
-    
+
     @PutMapping("/configs/{id}")
-    public ResponseEntity<AutomationConfig> updateConfig(@PathVariable Long id, 
-                                                       @RequestBody AutomationConfigDTO dto) {
+    public ResponseEntity<AutomationConfig> updateConfig(@PathVariable Long id,
+                                                         @RequestBody AutomationConfigDTO dto) {
         return configRepository.findById(id)
-            .map(config -> {
-                config.setName(dto.getName());
-                config.setDescription(dto.getDescription());
-                config.setSteps(dto.getSteps());
-                config.setSchedule(dto.getSchedule());
-                config.setActive(dto.isActive());
-                
-                AutomationConfig saved = configRepository.save(config);
-                
-                // Reschedule if needed
-                schedulerService.unscheduleAutomation(id);
-                if (saved.isActive() && saved.getSchedule() != null) {
-                    schedulerService.scheduleAutomation(saved);
-                }
-                
-                return ResponseEntity.ok(saved);
-            })
-            .orElse(ResponseEntity.notFound().build());
+                .map(config -> {
+                    config.setName(dto.getName());
+                    config.setDescription(dto.getDescription());
+                    config.setSteps(dto.getSteps());
+                    config.setSchedule(dto.getSchedule());
+                    config.setActive(dto.isActive());
+
+                    AutomationConfig saved = configRepository.save(config);
+
+                    // Reschedule if needed
+                    schedulerService.rescheduleAutomation(saved);
+
+                    return ResponseEntity.ok(saved);
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
-    
+
     @DeleteMapping("/configs/{id}")
     public ResponseEntity<Void> deleteConfig(@PathVariable Long id) {
         if (configRepository.existsById(id)) {
@@ -84,32 +83,47 @@ public class AutomationController {
         }
         return ResponseEntity.notFound().build();
     }
-    
+
     @PostMapping("/configs/{id}/run")
     public ResponseEntity<AutomationResult> runNow(@PathVariable Long id) {
         return configRepository.findById(id)
-            .map(config -> {
-                AutomationResult result = automationService.executeAutomation(config);
-                return ResponseEntity.ok(result);
-            })
-            .orElse(ResponseEntity.notFound().build());
+                .map(config -> {
+                    AutomationResult result = automationService.executeAutomation(config);
+                    return ResponseEntity.ok(result);
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
-    
+
+    @GetMapping("/configs/{id}/toggle")
+    public ResponseEntity<Map<String, Object>> getScheduleStatus(@PathVariable Long id) {
+        return configRepository.findById(id)
+                .map(config -> {
+                    Map<String, Object> status = new HashMap<>();
+                    status.put("configId", id);
+                    status.put("configName", config.getName());
+                    status.put("isActive", config.isActive());
+                    status.put("isScheduled", schedulerService.isScheduled(id));
+                    status.put("schedule", config.getSchedule());
+                    return ResponseEntity.ok(status);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PostMapping("/configs/{id}/toggle")
     public ResponseEntity<AutomationConfig> toggleActive(@PathVariable Long id) {
         return configRepository.findById(id)
-            .map(config -> {
-                config.setActive(!config.isActive());
-                AutomationConfig saved = configRepository.save(config);
-                
-                if (saved.isActive() && saved.getSchedule() != null) {
-                    schedulerService.scheduleAutomation(saved);
-                } else {
-                    schedulerService.unscheduleAutomation(id);
-                }
-                
-                return ResponseEntity.ok(saved);
-            })
-            .orElse(ResponseEntity.notFound().build());
+                .map(config -> {
+                    config.setActive(!config.isActive());
+                    AutomationConfig saved = configRepository.save(config);
+
+                    if (saved.isActive() && saved.getSchedule() != null) {
+                        schedulerService.scheduleAutomation(saved);
+                    } else {
+                        schedulerService.unscheduleAutomation(id);
+                    }
+
+                    return ResponseEntity.ok(saved);
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
-} 
+}

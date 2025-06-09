@@ -1,13 +1,13 @@
 spring:
   application:
     name: UI Automation Scheduler
-  
+
   datasource:
     url: jdbc:h2:file:./data/automation
     driver-class-name: org.h2.Driver
     username: sa
-    password: 
-  
+    password:
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -15,27 +15,12 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
-  
+        globally_quoted_identifiers: true
+
   h2:
     console:
       enabled: true
       path: /h2-console
-  
-  quartz:
-    job-store-type: jdbc
-    properties:
-      org:
-        quartz:
-          scheduler:
-            instanceName: AutomationScheduler
-            instanceId: AUTO
-          jobStore:
-            driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
-            useProperties: false
-            tablePrefix: QRTZ_
-            isClustered: false
-          threadPool:
-            threadCount: 10
 
 automation:
   screenshot:
@@ -51,4 +36,4 @@ logging:
   level:
     com.automation: DEBUG
     org.springframework.web: INFO
-    org.hibernate: WARN 
+    org.hibernate: WARN

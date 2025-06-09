@@ -2,19 +2,22 @@ package com.automation.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.quartz.SchedulerFactoryBean;
-import javax.sql.DataSource;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 @Configuration
+@EnableScheduling
 public class SchedulerConfig {
-    
+
     @Bean
-    public SchedulerFactoryBean schedulerFactoryBean(DataSource dataSource) {
-        SchedulerFactoryBean factory = new SchedulerFactoryBean();
-        factory.setDataSource(dataSource);
-        factory.setAutoStartup(true);
-        factory.setWaitForJobsToCompleteOnShutdown(true);
-        factory.setOverwriteExistingJobs(true);
-        return factory;
+    public TaskScheduler taskScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(10);
+        scheduler.setThreadNamePrefix("automation-scheduler-");
+        scheduler.setWaitForTasksToCompleteOnShutdown(true);
+        scheduler.setAwaitTerminationSeconds(30);
+        scheduler.initialize();
+        return scheduler;
     }
-} 
+}
