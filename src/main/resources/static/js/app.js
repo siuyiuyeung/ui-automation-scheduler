@@ -2,10 +2,10 @@
 async function loadConfigs() {
     const response = await fetch('/api/automation/configs');
     const configs = await response.json();
-    
+
     const container = document.getElementById('configsList');
     container.innerHTML = '';
-    
+
     configs.forEach(config => {
         const card = `
             <div class="col-md-4 mb-3">
@@ -35,15 +35,15 @@ async function loadConfigs() {
 async function loadHistory() {
     const response = await fetch('/api/history');
     const data = await response.json();
-    
+
     const tbody = document.getElementById('historyTable');
     tbody.innerHTML = '';
-    
+
     data.content.forEach(result => {
-        const duration = result.endTime ? 
-            Math.round((new Date(result.endTime) - new Date(result.startTime)) / 1000) + 's' : 
+        const duration = result.endTime ?
+            Math.round((new Date(result.endTime) - new Date(result.startTime)) / 1000) + 's' :
             'Running...';
-        
+
         const row = `
             <tr>
                 <td>${result.config.name}</td>
@@ -61,6 +61,115 @@ async function loadHistory() {
         `;
         tbody.innerHTML += row;
     });
+}
+
+async function viewDetails(resultId) {
+    try {
+        const response = await fetch(`/api/history/${resultId}`);
+        if (!response.ok) throw new Error('Failed to fetch details');
+
+        const result = await response.json();
+
+        let screenshotsHtml = '';
+        if (result.screenshotPaths && result.screenshotPaths.length > 0) {
+            screenshotsHtml = '<h6>Screenshots:</h6><div class="row">';
+            result.screenshotPaths.forEach((path, index) => {
+                screenshotsHtml += `
+                    <div class="col-md-4 mb-3">
+                        <img src="/api/history/${resultId}/screenshot/${index}" 
+                             class="img-fluid img-thumbnail" 
+                             alt="Screenshot ${index + 1}"
+                             style="cursor: pointer;"
+                             onclick="window.open('/api/history/${resultId}/screenshot/${index}', '_blank')">
+                        <small class="text-muted d-block mt-1">Screenshot ${index + 1}</small>
+                    </div>
+                `;
+            });
+            screenshotsHtml += '</div>';
+        }
+
+        const duration = result.endTime ?
+            Math.round((new Date(result.endTime) - new Date(result.startTime)) / 1000) :
+            'N/A';
+
+        const detailsHtml = `
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h6>Configuration:</h6>
+                    <p><strong>Name:</strong> ${result.config.name}</p>
+                    <p><strong>Description:</strong> ${result.config.description || 'N/A'}</p>
+                </div>
+                <div class="col-md-6">
+                    <h6>Execution Info:</h6>
+                    <p><strong>Status:</strong> 
+                        <span class="badge bg-${getStatusColor(result.status)}">${result.status}</span>
+                    </p>
+                    <p><strong>Start Time:</strong> ${new Date(result.startTime).toLocaleString()}</p>
+                    <p><strong>End Time:</strong> ${result.endTime ? new Date(result.endTime).toLocaleString() : 'N/A'}</p>
+                    <p><strong>Duration:</strong> ${duration} seconds</p>
+                </div>
+            </div>
+            
+            ${result.errorMessage ? `
+                <div class="alert alert-danger">
+                    <h6>Error Message:</h6>
+                    <pre class="mb-0">${escapeHtml(result.errorMessage)}</pre>
+                </div>
+            ` : ''}
+            
+            <div class="mb-4">
+                <h6>Execution Logs:</h6>
+                <div class="bg-light p-3 rounded" style="max-height: 300px; overflow-y: auto;">
+                    <pre class="mb-0">${escapeHtml(result.logs || 'No logs available')}</pre>
+                </div>
+            </div>
+            
+            ${screenshotsHtml}
+            
+            <div class="mb-4">
+                <h6>Automation Steps:</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Order</th>
+                                <th>Type</th>
+                                <th>Selector</th>
+                                <th>Value</th>
+                                <th>Wait</th>
+                                <th>Screenshot</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${result.config.steps.map(step => `
+                                <tr>
+                                    <td>${step.order}</td>
+                                    <td>${step.type}</td>
+                                    <td><code>${step.selector || '-'}</code></td>
+                                    <td>${step.value || '-'}</td>
+                                    <td>${step.waitSeconds}s</td>
+                                    <td>${step.captureScreenshot ? '✓' : '-'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('detailsContent').innerHTML = detailsHtml;
+        const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
+        modal.show();
+
+    } catch (error) {
+        alert('Failed to load details: ' + error.message);
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // Helper functions
@@ -134,34 +243,34 @@ function addStep() {
 function updateStepFields(stepId) {
     const stepType = document.querySelector(`#step-${stepId} .step-type`).value;
     const fieldsContainer = document.getElementById(`stepFields-${stepId}`);
-    
+
     let fields = '';
     switch(stepType) {
         case 'NAVIGATE':
-            fields = '<input type="text" class="form-control" placeholder="URL" data-field="value">';
+            fields = '<input type="text" class="form-control" placeholder="URL (e.g., https://example.com or example.com)" data-field="value" required>';
             break;
         case 'CLICK':
-            fields = '<input type="text" class="form-control" placeholder="CSS Selector" data-field="selector">';
+            fields = '<input type="text" class="form-control" placeholder="CSS Selector (e.g., #submit-button, .btn-primary)" data-field="selector" required>';
             break;
         case 'INPUT':
             fields = `
-                <input type="text" class="form-control mb-2" placeholder="CSS Selector" data-field="selector">
+                <input type="text" class="form-control mb-2" placeholder="CSS Selector (e.g., #username, input[name=\'email\'])" data-field="selector" required>
                 <input type="text" class="form-control" placeholder="Text to input" data-field="value">
             `;
             break;
         case 'WAIT':
-            fields = '<input type="number" class="form-control" placeholder="Seconds" data-field="waitSeconds">';
+            fields = '<input type="number" class="form-control" placeholder="Seconds to wait" data-field="waitSeconds" min="1" value="1">';
             break;
         case 'SCREENSHOT':
-            fields = '<input type="text" class="form-control" placeholder="CSS Selector (optional)" data-field="captureSelector">';
+            fields = '<input type="text" class="form-control" placeholder="CSS Selector for specific area (optional, leave empty for full page)" data-field="captureSelector">';
             break;
         case 'SCROLL':
-            fields = '<input type="number" class="form-control" placeholder="Scroll position (pixels)" data-field="value">';
+            fields = '<input type="number" class="form-control" placeholder="Scroll position in pixels (e.g., 500)" data-field="value" value="0">';
             break;
         case 'SELECT':
             fields = `
-                <input type="text" class="form-control mb-2" placeholder="CSS Selector" data-field="selector">
-                <input type="text" class="form-control" placeholder="Option value" data-field="value">
+                <input type="text" class="form-control mb-2" placeholder="CSS Selector (e.g., #country-select)" data-field="selector" required>
+                <input type="text" class="form-control" placeholder="Option value to select" data-field="value" required>
             `;
             break;
     }
@@ -176,7 +285,7 @@ function removeStep(stepId) {
 function updateScheduleFields() {
     const scheduleType = document.getElementById('scheduleType').value;
     const container = document.getElementById('scheduleFields');
-    
+
     let fields = '';
     switch(scheduleType) {
         case 'ONCE':
@@ -195,59 +304,132 @@ function updateScheduleFields() {
 // Form submission
 document.getElementById('configForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
+    // Validate form
+    const name = document.getElementById('configName').value.trim();
+    if (!name) {
+        alert('Configuration name is required');
+        return;
+    }
+
     const steps = [];
-    document.querySelectorAll('[id^="step-"]').forEach((stepDiv, index) => {
+    const stepDivs = document.querySelectorAll('[id^="step-"]');
+
+    if (stepDivs.length === 0) {
+        alert('At least one step is required');
+        return;
+    }
+
+    // Validate and collect steps
+    for (let index = 0; index < stepDivs.length; index++) {
+        const stepDiv = stepDivs[index];
         const type = stepDiv.querySelector('.step-type').value;
         const step = {
             order: index,
             type: type
         };
-        
+
+        // Collect all fields
         stepDiv.querySelectorAll('[data-field]').forEach(input => {
             step[input.dataset.field] = input.value;
         });
-        
+
+        // Validate required fields based on step type
+        let error = null;
+        switch (type) {
+            case 'NAVIGATE':
+                if (!step.value || !step.value.trim()) {
+                    error = `Step ${index + 1} (Navigate): URL is required`;
+                }
+                break;
+            case 'CLICK':
+                if (!step.selector || !step.selector.trim()) {
+                    error = `Step ${index + 1} (Click): CSS Selector is required`;
+                }
+                break;
+            case 'INPUT':
+                if (!step.selector || !step.selector.trim()) {
+                    error = `Step ${index + 1} (Input): CSS Selector is required`;
+                }
+                break;
+            case 'SELECT':
+                if (!step.selector || !step.selector.trim()) {
+                    error = `Step ${index + 1} (Select): CSS Selector is required`;
+                }
+                if (!step.value || !step.value.trim()) {
+                    error = `Step ${index + 1} (Select): Option value is required`;
+                }
+                break;
+        }
+
+        if (error) {
+            alert(error);
+            return;
+        }
+
         steps.push(step);
-    });
-    
+    }
+
     const scheduleType = document.getElementById('scheduleType').value;
     let schedule = null;
     if (scheduleType) {
         schedule = { type: scheduleType };
         switch(scheduleType) {
             case 'ONCE':
-                schedule.runOnceAt = document.getElementById('runOnceAt').value;
+                const runOnceAt = document.getElementById('runOnceAt').value;
+                if (!runOnceAt) {
+                    alert('Schedule: Run once date/time is required');
+                    return;
+                }
+                schedule.runOnceAt = runOnceAt;
                 break;
             case 'INTERVAL':
-                schedule.intervalMinutes = parseInt(document.getElementById('intervalMinutes').value);
+                const intervalMinutes = parseInt(document.getElementById('intervalMinutes').value);
+                if (!intervalMinutes || intervalMinutes <= 0) {
+                    alert('Schedule: Interval must be greater than 0');
+                    return;
+                }
+                schedule.intervalMinutes = intervalMinutes;
                 break;
             case 'CRON':
-                schedule.cronExpression = document.getElementById('cronExpression').value;
+                const cronExpression = document.getElementById('cronExpression').value;
+                if (!cronExpression || !cronExpression.trim()) {
+                    alert('Schedule: Cron expression is required');
+                    return;
+                }
+                schedule.cronExpression = cronExpression;
                 break;
         }
     }
-    
+
     const config = {
-        name: document.getElementById('configName').value,
+        name: name,
         description: document.getElementById('configDescription').value,
         steps: steps,
         schedule: schedule,
         active: true
     };
-    
-    const response = await fetch('/api/automation/configs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config)
-    });
-    
-    if (response.ok) {
-        alert('Configuration created successfully!');
-        document.getElementById('configForm').reset();
-        document.getElementById('stepsContainer').innerHTML = '';
-        document.getElementById('scheduleFields').innerHTML = '';
-        loadConfigs();
+
+    try {
+        const response = await fetch('/api/automation/configs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(config)
+        });
+
+        if (response.ok) {
+            alert('Configuration created successfully!');
+            document.getElementById('configForm').reset();
+            document.getElementById('stepsContainer').innerHTML = '';
+            document.getElementById('scheduleFields').innerHTML = '';
+            stepCount = 0;
+            loadConfigs();
+        } else {
+            const error = await response.text();
+            alert('Failed to create configuration: ' + error);
+        }
+    } catch (error) {
+        alert('Error creating configuration: ' + error.message);
     }
 });
 
@@ -256,4 +438,4 @@ loadConfigs();
 loadHistory();
 
 // Auto-refresh history every 10 seconds
-setInterval(loadHistory, 10000); 
+setInterval(loadHistory, 10000);

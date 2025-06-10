@@ -7,13 +7,18 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-    
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // Serve screenshots from file system
         registry.addResourceHandler("/screenshots/**")
                 .addResourceLocations("file:./screenshots/");
+
+        // Serve static resources
+        registry.addResourceHandler("/static/**")
+                .addResourceLocations("classpath:/static/");
     }
-    
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
@@ -21,4 +26,4 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedHeaders("*");
     }
-} 
+}

@@ -560,19 +560,39 @@ public class AutomationService {
                            AutomationResult result, StringBuilder logs) throws Exception {
         logs.append("Executing step: ").append(step.getType()).append("\n");
         
+        // Validate step data
+        validateStep(step);
+        
         switch (step.getType()) {
             case NAVIGATE:
-                driver.get(step.getValue());
-                logs.append("Navigated to: ").append(step.getValue()).append("\n");
+                String url = step.getValue();
+                if (url == null || url.trim().isEmpty()) {
+                    throw new IllegalArgumentException("Navigate step requires a valid URL");
+                }
+                // Add protocol if missing
+                if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                    url = "https://" + url;
+                }
+                driver.get(url);
+                logs.append("Navigated to: ").append(url).append("\n");
                 break;
                 
             case CLICK:
+                if (step.getSelector() == null || step.getSelector().trim().isEmpty()) {
+                    throw new IllegalArgumentException("Click step requires a selector");
+                }
                 WebElement clickElement = driver.findElement(By.cssSelector(step.getSelector()));
                 clickElement.click();
                 logs.append("Clicked element: ").append(step.getSelector()).append("\n");
                 break;
                 
             case INPUT:
+                if (step.getSelector() == null || step.getSelector().trim().isEmpty()) {
+                    throw new IllegalArgumentException("Input step requires a selector");
+                }
+                if (step.getValue() == null) {
+                    step.setValue(""); // Allow empty input
+                }
                 WebElement inputElement = driver.findElement(By.cssSelector(step.getSelector()));
                 inputElement.clear();
                 inputElement.sendKeys(step.getValue());
@@ -580,8 +600,9 @@ public class AutomationService {
                 break;
                 
             case WAIT:
-                Thread.sleep(step.getWaitSeconds() * 1000L);
-                logs.append("Waited for: ").append(step.getWaitSeconds()).append(" seconds\n");
+                int waitTime = step.getWaitSeconds() > 0 ? step.getWaitSeconds() : 1;
+                Thread.sleep(waitTime * 1000L);
+                logs.append("Waited for: ").append(waitTime).append(" seconds\n");
                 break;
                 
             case SCREENSHOT:
@@ -591,25 +612,38 @@ public class AutomationService {
                 break;
                 
             case SCROLL:
-                ((JavascriptExecutor) driver).executeScript("window.scrollTo(0, " + step.getValue() + ")");
-                logs.append("Scrolled to position: ").append(step.getValue()).append("\n");
+                String scrollValue = step.getValue() != null ? step.getValue() : "0";
+                ((JavascriptExecutor) driver).executeScript("window.scrollTo(0, " + scrollValue + ")");
+                logs.append("Scrolled to position: ").append(scrollValue).append("\n");
                 break;
                 
             case SELECT:
+                if (step.getSelector() == null || step.getSelector().trim().isEmpty()) {
+                    throw new IllegalArgumentException("Select step requires a selector");
+                }
+                if (step.getValue() == null || step.getValue().trim().isEmpty()) {
+                    throw new IllegalArgumentException("Select step requires a value");
+                }
                 Select select = new Select(driver.findElement(By.cssSelector(step.getSelector())));
                 select.selectByValue(step.getValue());
                 logs.append("Selected option: ").append(step.getValue()).append("\n");
                 break;
         }
         
-        if (step.isCaptureScreenshot()) {
+        if (step.isCaptureScreenshot() && step.getType() != AutomationStep.StepType.SCREENSHOT) {
             String screenshotPath = webDriverService.captureScreenshot(driver, step.getCaptureSelector());
             result.getScreenshotPaths().add(screenshotPath);
             logs.append("Step screenshot captured: ").append(screenshotPath).append("\n");
         }
         
-        if (step.getWaitSeconds() > 0) {
+        if (step.getWaitSeconds() > 0 && step.getType() != AutomationStep.StepType.WAIT) {
             Thread.sleep(step.getWaitSeconds() * 1000L);
+        }
+    }
+    
+    private void validateStep(AutomationStep step) {
+        if (step.getType() == null) {
+            throw new IllegalArgumentException("Step type is required");
         }
     }
 }
@@ -804,6 +838,9 @@ public class AutomationController {
     
     @PostMapping("/configs")
     public ResponseEntity<AutomationConfig> createConfig(@RequestBody AutomationConfigDTO dto) {
+        // Validate configuration
+        validateConfiguration(dto);
+        
         AutomationConfig config = new AutomationConfig();
         // Map DTO to entity
         config.setName(dto.getName());
@@ -824,6 +861,9 @@ public class AutomationController {
     @PutMapping("/configs/{id}")
     public ResponseEntity<AutomationConfig> updateConfig(@PathVariable Long id, 
                                                        @RequestBody AutomationConfigDTO dto) {
+        // Validate configuration
+        validateConfiguration(dto);
+        
         return configRepository.findById(id)
             .map(config -> {
                 config.setName(dto.getName());
@@ -840,6 +880,61 @@ public class AutomationController {
                 return ResponseEntity.ok(saved);
             })
             .orElse(ResponseEntity.notFound().build());
+    }
+    
+    private void validateConfiguration(AutomationConfigDTO dto) {
+        if (dto.getName() == null || dto.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Configuration name is required");
+        }
+        
+        if (dto.getSteps() == null || dto.getSteps().isEmpty()) {
+            throw new IllegalArgumentException("At least one step is required");
+        }
+        
+        // Validate each step
+        for (int i = 0; i < dto.getSteps().size(); i++) {
+            AutomationStep step = dto.getSteps().get(i);
+            if (step.getType() == null) {
+                throw new IllegalArgumentException("Step " + (i + 1) + ": Type is required");
+            }
+            
+            switch (step.getType()) {
+                case NAVIGATE:
+                    if (step.getValue() == null || step.getValue().trim().isEmpty()) {
+                        throw new IllegalArgumentException("Step " + (i + 1) + " (NAVIGATE): URL is required");
+                    }
+                    break;
+                case CLICK:
+                case INPUT:
+                case SELECT:
+                    if (step.getSelector() == null || step.getSelector().trim().isEmpty()) {
+                        throw new IllegalArgumentException("Step " + (i + 1) + " (" + step.getType() + "): Selector is required");
+                    }
+                    break;
+            }
+        }
+        
+        // Validate schedule if present
+        if (dto.getSchedule() != null) {
+            ScheduleConfig schedule = dto.getSchedule();
+            switch (schedule.getType()) {
+                case ONCE:
+                    if (schedule.getRunOnceAt() == null || schedule.getRunOnceAt().trim().isEmpty()) {
+                        throw new IllegalArgumentException("Schedule: Run once date/time is required");
+                    }
+                    break;
+                case INTERVAL:
+                    if (schedule.getIntervalMinutes() == null || schedule.getIntervalMinutes() <= 0) {
+                        throw new IllegalArgumentException("Schedule: Interval must be greater than 0");
+                    }
+                    break;
+                case CRON:
+                    if (schedule.getCronExpression() == null || schedule.getCronExpression().trim().isEmpty()) {
+                        throw new IllegalArgumentException("Schedule: Cron expression is required");
+                    }
+                    break;
+            }
+        }
     }
     
     @DeleteMapping("/configs/{id}")
@@ -910,6 +1005,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 
 @RestController
@@ -945,6 +1044,28 @@ public class HistoryController {
     public ResponseEntity<AutomationResult> getResult(@PathVariable Long id) {
         return resultRepository.findById(id)
             .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
+    
+    @GetMapping("/{id}/screenshot/{index}")
+    public ResponseEntity<byte[]> getScreenshot(@PathVariable Long id, @PathVariable int index) {
+        return resultRepository.findById(id)
+            .map(result -> {
+                if (result.getScreenshotPaths() != null && 
+                    index >= 0 && 
+                    index < result.getScreenshotPaths().size()) {
+                    try {
+                        Path path = Paths.get(result.getScreenshotPaths().get(index));
+                        byte[] image = Files.readAllBytes(path);
+                        return ResponseEntity.ok()
+                            .header("Content-Type", "image/png")
+                            .body(image);
+                    } catch (IOException e) {
+                        return ResponseEntity.notFound().<byte[]>build();
+                    }
+                }
+                return ResponseEntity.notFound().<byte[]>build();
+            })
             .orElse(ResponseEntity.notFound().build());
     }
     
@@ -1064,8 +1185,13 @@ public class WebConfig implements WebMvcConfigurer {
     
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // Serve screenshots from file system
         registry.addResourceHandler("/screenshots/**")
                 .addResourceLocations("file:./screenshots/");
+        
+        // Serve static resources
+        registry.addResourceHandler("/static/**")
+                .addResourceLocations("classpath:/static/");
     }
     
     @Override
@@ -1222,6 +1348,24 @@ public class SeleniumConfig {
             </form>
         </div>
     </div>
+    
+    <!-- Details Modal -->
+    <div class="modal fade" id="detailsModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Automation Execution Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="detailsContent">
+                    <!-- Content will be loaded dynamically -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/app.js"></script>
@@ -1294,6 +1438,115 @@ async function loadHistory() {
         `;
         tbody.innerHTML += row;
     });
+}
+
+async function viewDetails(resultId) {
+    try {
+        const response = await fetch(`/api/history/${resultId}`);
+        if (!response.ok) throw new Error('Failed to fetch details');
+        
+        const result = await response.json();
+        
+        let screenshotsHtml = '';
+        if (result.screenshotPaths && result.screenshotPaths.length > 0) {
+            screenshotsHtml = '<h6>Screenshots:</h6><div class="row">';
+            result.screenshotPaths.forEach((path, index) => {
+                screenshotsHtml += `
+                    <div class="col-md-4 mb-3">
+                        <img src="/api/history/${resultId}/screenshot/${index}" 
+                             class="img-fluid img-thumbnail" 
+                             alt="Screenshot ${index + 1}"
+                             style="cursor: pointer;"
+                             onclick="window.open('/api/history/${resultId}/screenshot/${index}', '_blank')">
+                        <small class="text-muted d-block mt-1">Screenshot ${index + 1}</small>
+                    </div>
+                `;
+            });
+            screenshotsHtml += '</div>';
+        }
+        
+        const duration = result.endTime ? 
+            Math.round((new Date(result.endTime) - new Date(result.startTime)) / 1000) : 
+            'N/A';
+        
+        const detailsHtml = `
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h6>Configuration:</h6>
+                    <p><strong>Name:</strong> ${result.config.name}</p>
+                    <p><strong>Description:</strong> ${result.config.description || 'N/A'}</p>
+                </div>
+                <div class="col-md-6">
+                    <h6>Execution Info:</h6>
+                    <p><strong>Status:</strong> 
+                        <span class="badge bg-${getStatusColor(result.status)}">${result.status}</span>
+                    </p>
+                    <p><strong>Start Time:</strong> ${new Date(result.startTime).toLocaleString()}</p>
+                    <p><strong>End Time:</strong> ${result.endTime ? new Date(result.endTime).toLocaleString() : 'N/A'}</p>
+                    <p><strong>Duration:</strong> ${duration} seconds</p>
+                </div>
+            </div>
+            
+            ${result.errorMessage ? `
+                <div class="alert alert-danger">
+                    <h6>Error Message:</h6>
+                    <pre class="mb-0">${escapeHtml(result.errorMessage)}</pre>
+                </div>
+            ` : ''}
+            
+            <div class="mb-4">
+                <h6>Execution Logs:</h6>
+                <div class="bg-light p-3 rounded" style="max-height: 300px; overflow-y: auto;">
+                    <pre class="mb-0">${escapeHtml(result.logs || 'No logs available')}</pre>
+                </div>
+            </div>
+            
+            ${screenshotsHtml}
+            
+            <div class="mb-4">
+                <h6>Automation Steps:</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Order</th>
+                                <th>Type</th>
+                                <th>Selector</th>
+                                <th>Value</th>
+                                <th>Wait</th>
+                                <th>Screenshot</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${result.config.steps.map(step => `
+                                <tr>
+                                    <td>${step.order}</td>
+                                    <td>${step.type}</td>
+                                    <td><code>${step.selector || '-'}</code></td>
+                                    <td>${step.value || '-'}</td>
+                                    <td>${step.waitSeconds}s</td>
+                                    <td>${step.captureScreenshot ? '✓' : '-'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('detailsContent').innerHTML = detailsHtml;
+        const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
+        modal.show();
+        
+    } catch (error) {
+        alert('Failed to load details: ' + error.message);
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // Helper functions
@@ -1371,30 +1624,30 @@ function updateStepFields(stepId) {
     let fields = '';
     switch(stepType) {
         case 'NAVIGATE':
-            fields = '<input type="text" class="form-control" placeholder="URL" data-field="value">';
+            fields = '<input type="text" class="form-control" placeholder="URL (e.g., https://example.com or example.com)" data-field="value" required>';
             break;
         case 'CLICK':
-            fields = '<input type="text" class="form-control" placeholder="CSS Selector" data-field="selector">';
+            fields = '<input type="text" class="form-control" placeholder="CSS Selector (e.g., #submit-button, .btn-primary)" data-field="selector" required>';
             break;
         case 'INPUT':
             fields = `
-                <input type="text" class="form-control mb-2" placeholder="CSS Selector" data-field="selector">
+                <input type="text" class="form-control mb-2" placeholder="CSS Selector (e.g., #username, input[name=\'email\'])" data-field="selector" required>
                 <input type="text" class="form-control" placeholder="Text to input" data-field="value">
             `;
             break;
         case 'WAIT':
-            fields = '<input type="number" class="form-control" placeholder="Seconds" data-field="waitSeconds">';
+            fields = '<input type="number" class="form-control" placeholder="Seconds to wait" data-field="waitSeconds" min="1" value="1">';
             break;
         case 'SCREENSHOT':
-            fields = '<input type="text" class="form-control" placeholder="CSS Selector (optional)" data-field="captureSelector">';
+            fields = '<input type="text" class="form-control" placeholder="CSS Selector for specific area (optional, leave empty for full page)" data-field="captureSelector">';
             break;
         case 'SCROLL':
-            fields = '<input type="number" class="form-control" placeholder="Scroll position (pixels)" data-field="value">';
+            fields = '<input type="number" class="form-control" placeholder="Scroll position in pixels (e.g., 500)" data-field="value" value="0">';
             break;
         case 'SELECT':
             fields = `
-                <input type="text" class="form-control mb-2" placeholder="CSS Selector" data-field="selector">
-                <input type="text" class="form-control" placeholder="Option value" data-field="value">
+                <input type="text" class="form-control mb-2" placeholder="CSS Selector (e.g., #country-select)" data-field="selector" required>
+                <input type="text" class="form-control" placeholder="Option value to select" data-field="value" required>
             `;
             break;
     }
@@ -1429,20 +1682,70 @@ function updateScheduleFields() {
 document.getElementById('configForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
+    // Validate form
+    const name = document.getElementById('configName').value.trim();
+    if (!name) {
+        alert('Configuration name is required');
+        return;
+    }
+    
     const steps = [];
-    document.querySelectorAll('[id^="step-"]').forEach((stepDiv, index) => {
+    const stepDivs = document.querySelectorAll('[id^="step-"]');
+    
+    if (stepDivs.length === 0) {
+        alert('At least one step is required');
+        return;
+    }
+    
+    // Validate and collect steps
+    for (let index = 0; index < stepDivs.length; index++) {
+        const stepDiv = stepDivs[index];
         const type = stepDiv.querySelector('.step-type').value;
         const step = {
             order: index,
             type: type
         };
         
+        // Collect all fields
         stepDiv.querySelectorAll('[data-field]').forEach(input => {
             step[input.dataset.field] = input.value;
         });
         
+        // Validate required fields based on step type
+        let error = null;
+        switch (type) {
+            case 'NAVIGATE':
+                if (!step.value || !step.value.trim()) {
+                    error = `Step ${index + 1} (Navigate): URL is required`;
+                }
+                break;
+            case 'CLICK':
+                if (!step.selector || !step.selector.trim()) {
+                    error = `Step ${index + 1} (Click): CSS Selector is required`;
+                }
+                break;
+            case 'INPUT':
+                if (!step.selector || !step.selector.trim()) {
+                    error = `Step ${index + 1} (Input): CSS Selector is required`;
+                }
+                break;
+            case 'SELECT':
+                if (!step.selector || !step.selector.trim()) {
+                    error = `Step ${index + 1} (Select): CSS Selector is required`;
+                }
+                if (!step.value || !step.value.trim()) {
+                    error = `Step ${index + 1} (Select): Option value is required`;
+                }
+                break;
+        }
+        
+        if (error) {
+            alert(error);
+            return;
+        }
+        
         steps.push(step);
-    });
+    }
     
     const scheduleType = document.getElementById('scheduleType').value;
     let schedule = null;
@@ -1450,37 +1753,60 @@ document.getElementById('configForm').addEventListener('submit', async (e) => {
         schedule = { type: scheduleType };
         switch(scheduleType) {
             case 'ONCE':
-                schedule.runOnceAt = document.getElementById('runOnceAt').value;
+                const runOnceAt = document.getElementById('runOnceAt').value;
+                if (!runOnceAt) {
+                    alert('Schedule: Run once date/time is required');
+                    return;
+                }
+                schedule.runOnceAt = runOnceAt;
                 break;
             case 'INTERVAL':
-                schedule.intervalMinutes = parseInt(document.getElementById('intervalMinutes').value);
+                const intervalMinutes = parseInt(document.getElementById('intervalMinutes').value);
+                if (!intervalMinutes || intervalMinutes <= 0) {
+                    alert('Schedule: Interval must be greater than 0');
+                    return;
+                }
+                schedule.intervalMinutes = intervalMinutes;
                 break;
             case 'CRON':
-                schedule.cronExpression = document.getElementById('cronExpression').value;
+                const cronExpression = document.getElementById('cronExpression').value;
+                if (!cronExpression || !cronExpression.trim()) {
+                    alert('Schedule: Cron expression is required');
+                    return;
+                }
+                schedule.cronExpression = cronExpression;
                 break;
         }
     }
     
     const config = {
-        name: document.getElementById('configName').value,
+        name: name,
         description: document.getElementById('configDescription').value,
         steps: steps,
         schedule: schedule,
         active: true
     };
     
-    const response = await fetch('/api/automation/configs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config)
-    });
-    
-    if (response.ok) {
-        alert('Configuration created successfully!');
-        document.getElementById('configForm').reset();
-        document.getElementById('stepsContainer').innerHTML = '';
-        document.getElementById('scheduleFields').innerHTML = '';
-        loadConfigs();
+    try {
+        const response = await fetch('/api/automation/configs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(config)
+        });
+        
+        if (response.ok) {
+            alert('Configuration created successfully!');
+            document.getElementById('configForm').reset();
+            document.getElementById('stepsContainer').innerHTML = '';
+            document.getElementById('scheduleFields').innerHTML = '';
+            stepCount = 0;
+            loadConfigs();
+        } else {
+            const error = await response.text();
+            alert('Failed to create configuration: ' + error);
+        }
+    } catch (error) {
+        alert('Error creating configuration: ' + error.message);
     }
 });
 
@@ -1522,6 +1848,39 @@ body {
 .badge {
    padding: 0.5em 1em;
 }
+
+/* Modal styles */
+.modal-xl {
+   max-width: 90%;
+}
+
+.img-thumbnail {
+   transition: transform 0.2s;
+}
+
+.img-thumbnail:hover {
+   transform: scale(1.05);
+}
+
+pre {
+   white-space: pre-wrap;
+   word-wrap: break-word;
+   font-size: 0.875rem;
+}
+
+code {
+   font-size: 0.875rem;
+   color: #d63384;
+   background-color: #f8f9fa;
+   padding: 2px 4px;
+   border-radius: 3px;
+}
+
+/* Status badge colors */
+.bg-success { background-color: #28a745 !important; }
+.bg-danger { background-color: #dc3545 !important; }
+.bg-primary { background-color: #007bff !important; }
+.bg-secondary { background-color: #6c757d !important; }
 ```
 
 ## Usage Instructions

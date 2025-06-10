@@ -3,6 +3,8 @@ package com.automation.controller;
 import com.automation.dto.AutomationConfigDTO;
 import com.automation.model.AutomationConfig;
 import com.automation.model.AutomationResult;
+import com.automation.model.AutomationStep;
+import com.automation.model.ScheduleConfig;
 import com.automation.repository.AutomationConfigRepository;
 import com.automation.service.AutomationService;
 import com.automation.service.SchedulerService;
@@ -36,6 +38,9 @@ public class AutomationController {
 
     @PostMapping("/configs")
     public ResponseEntity<AutomationConfig> createConfig(@RequestBody AutomationConfigDTO dto) {
+        // Validate configuration
+        validateConfiguration(dto);
+
         AutomationConfig config = new AutomationConfig();
         // Map DTO to entity
         config.setName(dto.getName());
@@ -56,6 +61,9 @@ public class AutomationController {
     @PutMapping("/configs/{id}")
     public ResponseEntity<AutomationConfig> updateConfig(@PathVariable Long id,
                                                          @RequestBody AutomationConfigDTO dto) {
+        // Validate configuration
+        validateConfiguration(dto);
+
         return configRepository.findById(id)
                 .map(config -> {
                     config.setName(dto.getName());
@@ -72,6 +80,61 @@ public class AutomationController {
                     return ResponseEntity.ok(saved);
                 })
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    private void validateConfiguration(AutomationConfigDTO dto) {
+        if (dto.getName() == null || dto.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Configuration name is required");
+        }
+
+        if (dto.getSteps() == null || dto.getSteps().isEmpty()) {
+            throw new IllegalArgumentException("At least one step is required");
+        }
+
+        // Validate each step
+        for (int i = 0; i < dto.getSteps().size(); i++) {
+            AutomationStep step = dto.getSteps().get(i);
+            if (step.getType() == null) {
+                throw new IllegalArgumentException("Step " + (i + 1) + ": Type is required");
+            }
+
+            switch (step.getType()) {
+                case NAVIGATE:
+                    if (step.getValue() == null || step.getValue().trim().isEmpty()) {
+                        throw new IllegalArgumentException("Step " + (i + 1) + " (NAVIGATE): URL is required");
+                    }
+                    break;
+                case CLICK:
+                case INPUT:
+                case SELECT:
+                    if (step.getSelector() == null || step.getSelector().trim().isEmpty()) {
+                        throw new IllegalArgumentException("Step " + (i + 1) + " (" + step.getType() + "): Selector is required");
+                    }
+                    break;
+            }
+        }
+
+        // Validate schedule if present
+        if (dto.getSchedule() != null) {
+            ScheduleConfig schedule = dto.getSchedule();
+            switch (schedule.getType()) {
+                case ONCE:
+                    if (schedule.getRunOnceAt() == null || schedule.getRunOnceAt().trim().isEmpty()) {
+                        throw new IllegalArgumentException("Schedule: Run once date/time is required");
+                    }
+                    break;
+                case INTERVAL:
+                    if (schedule.getIntervalMinutes() == null || schedule.getIntervalMinutes() <= 0) {
+                        throw new IllegalArgumentException("Schedule: Interval must be greater than 0");
+                    }
+                    break;
+                case CRON:
+                    if (schedule.getCronExpression() == null || schedule.getCronExpression().trim().isEmpty()) {
+                        throw new IllegalArgumentException("Schedule: Cron expression is required");
+                    }
+                    break;
+            }
+        }
     }
 
     @DeleteMapping("/configs/{id}")
