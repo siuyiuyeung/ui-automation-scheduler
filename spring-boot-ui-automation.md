@@ -52,102 +52,102 @@ ui-automation-scheduler/
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
-   <modelVersion>4.0.0</modelVersion>
-
-   <parent>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-parent</artifactId>
-      <version>3.3.0</version>
-      <relativePath/>
-   </parent>
-
-   <groupId>com.automation</groupId>
-   <artifactId>ui-automation-scheduler</artifactId>
-   <version>1.0.0</version>
-   <name>UI Automation Scheduler</name>
-
-   <properties>
-      <java.version>24</java.version>
-      <selenium.version>4.20.0</selenium.version>
-   </properties>
-
-   <dependencies>
-      <!-- Spring Boot Starters -->
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-web</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-data-jpa</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-thymeleaf</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-validation</artifactId>
-      </dependency>
-
-      <!-- No Quartz dependency needed, using Spring's built-in scheduling -->
-
-      <!-- Database -->
-      <dependency>
-         <groupId>com.h2database</groupId>
-         <artifactId>h2</artifactId>
-         <scope>runtime</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.postgresql</groupId>
-         <artifactId>postgresql</artifactId>
-         <scope>runtime</scope>
-      </dependency>
-
-      <!-- Selenium -->
-      <dependency>
-         <groupId>org.seleniumhq.selenium</groupId>
-         <artifactId>selenium-java</artifactId>
-         <version>${selenium.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.seleniumhq.selenium</groupId>
-         <artifactId>selenium-devtools-v129</artifactId>
-         <version>${selenium.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>io.github.bonigarcia</groupId>
-         <artifactId>webdrivermanager</artifactId>
-         <version>5.8.0</version>
-      </dependency>
-
-      <!-- Utilities -->
-      <dependency>
-         <groupId>org.projectlombok</groupId>
-         <artifactId>lombok</artifactId>
-         <optional>true</optional>
-      </dependency>
-      <dependency>
-         <groupId>com.fasterxml.jackson.datatype</groupId>
-         <artifactId>jackson-datatype-jsr310</artifactId>
-      </dependency>
-
-      <!-- Test -->
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-test</artifactId>
-         <scope>test</scope>
-      </dependency>
-   </dependencies>
-
-   <build>
-      <plugins>
-         <plugin>
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.0</version>
+        <relativePath/>
+    </parent>
+    
+    <groupId>com.automation</groupId>
+    <artifactId>ui-automation-scheduler</artifactId>
+    <version>1.0.0</version>
+    <name>UI Automation Scheduler</name>
+    
+    <properties>
+        <java.version>24</java.version>
+        <selenium.version>4.20.0</selenium.version>
+    </properties>
+    
+    <dependencies>
+        <!-- Spring Boot Starters -->
+        <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-maven-plugin</artifactId>
-         </plugin>
-      </plugins>
-   </build>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        
+        <!-- No Quartz dependency needed, using Spring's built-in scheduling -->
+        
+        <!-- Database -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        
+        <!-- Selenium -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>${selenium.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-devtools-v129</artifactId>
+            <version>${selenium.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.bonigarcia</groupId>
+            <artifactId>webdrivermanager</artifactId>
+            <version>5.8.0</version>
+        </dependency>
+        
+        <!-- Utilities -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+        
+        <!-- Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>
 ```
 
@@ -193,13 +193,16 @@ public class AutomationConfig {
     
     private String description;
     
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "config_id")
     private List<AutomationStep> steps;
     
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "schedule_id")
     private ScheduleConfig schedule;
+    
+    @OneToMany(mappedBy = "config", cascade = CascadeType.REMOVE)
+    private List<AutomationResult> results;
     
     private boolean active = true;
     
@@ -272,7 +275,7 @@ public class AutomationResult {
     private Long id;
     
     @ManyToOne
-    @JoinColumn(name = "config_id")
+    @JoinColumn(name = "config_id", nullable = false)
     private AutomationConfig config;
     
     @Enumerated(EnumType.STRING)
@@ -370,6 +373,8 @@ public interface AutomationResultRepository extends JpaRepository<AutomationResu
     Page<AutomationResult> findByConfigId(Long configId, Pageable pageable);
     Page<AutomationResult> findByStartTimeBetween(LocalDateTime start, LocalDateTime end, Pageable pageable);
     Page<AutomationResult> findByStatus(AutomationResult.Status status, Pageable pageable);
+    long countByConfigId(Long configId);
+    void deleteByConfigId(Long configId);
 }
 ```
 
@@ -823,6 +828,7 @@ public class AutomationController {
     private final AutomationConfigRepository configRepository;
     private final AutomationService automationService;
     private final SchedulerService schedulerService;
+    private final ConfigurationService configurationService;
     
     @GetMapping("/configs")
     public List<AutomationConfig> getAllConfigs() {
@@ -938,13 +944,43 @@ public class AutomationController {
     }
     
     @DeleteMapping("/configs/{id}")
-    public ResponseEntity<Void> deleteConfig(@PathVariable Long id) {
-        if (configRepository.existsById(id)) {
-            schedulerService.unscheduleAutomation(id);
-            configRepository.deleteById(id);
-            return ResponseEntity.ok().build();
+    public ResponseEntity<Map<String, Object>> deleteConfig(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "false") boolean force) {
+        
+        if (!configRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.notFound().build();
+        
+        // Check if there are associated results
+        long resultCount = configurationService.countResultsForConfig(id);
+        
+        if (resultCount > 0 && !force) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("error", "Cannot delete configuration");
+            response.put("message", String.format(
+                "This configuration has %d execution results. " +
+                "Delete the results first or use force=true to delete everything.", 
+                resultCount));
+            response.put("resultCount", resultCount);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        }
+        
+        try {
+            configurationService.deleteConfiguration(id, force);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Configuration deleted successfully");
+            response.put("deletedResults", force ? resultCount : 0);
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("error", "Failed to delete configuration");
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
     
     @PostMapping("/configs/{id}/run")
@@ -1575,11 +1611,40 @@ async function toggleActive(configId) {
 }
 
 async function deleteConfig(configId) {
-    if (confirm('Are you sure you want to delete this configuration?')) {
-        const response = await fetch(`/api/automation/configs/${configId}`, { method: 'DELETE' });
-        if (response.ok) {
-            loadConfigs();
+    if (!confirm('Are you sure you want to delete this configuration?')) {
+        return;
+    }
+    
+    try {
+        // First try to delete without force
+        let response = await fetch(`/api/automation/configs/${configId}`, { method: 'DELETE' });
+        
+        if (response.status === 409) {
+            // Conflict - has results
+            const data = await response.json();
+            const forceDelete = confirm(
+                `${data.message}\n\n` +
+                `Do you want to delete the configuration and all ${data.resultCount} execution results?`
+            );
+            
+            if (forceDelete) {
+                response = await fetch(`/api/automation/configs/${configId}?force=true`, { method: 'DELETE' });
+            } else {
+                return;
+            }
         }
+        
+        if (response.ok) {
+            const result = await response.json();
+            alert(result.message || 'Configuration deleted successfully');
+            loadConfigs();
+            loadHistory();
+        } else {
+            const error = await response.json();
+            alert('Failed to delete: ' + (error.message || 'Unknown error'));
+        }
+    } catch (error) {
+        alert('Error deleting configuration: ' + error.message);
     }
 }
 
@@ -1821,59 +1886,59 @@ setInterval(loadHistory, 10000);
 ### static/css/style.css
 ```css
 body {
-   background-color: #f8f9fa;
+    background-color: #f8f9fa;
 }
 
 .card {
-   box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-   transition: transform 0.2s;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: transform 0.2s;
 }
 
 .card:hover {
-   transform: translateY(-5px);
+    transform: translateY(-5px);
 }
 
 .navbar-brand {
-   font-weight: bold;
+    font-weight: bold;
 }
 
 #stepsContainer .card {
-   background-color: #f1f3f5;
+    background-color: #f1f3f5;
 }
 
 .table {
-   background-color: white;
+    background-color: white;
 }
 
 .badge {
-   padding: 0.5em 1em;
+    padding: 0.5em 1em;
 }
 
 /* Modal styles */
 .modal-xl {
-   max-width: 90%;
+    max-width: 90%;
 }
 
 .img-thumbnail {
-   transition: transform 0.2s;
+    transition: transform 0.2s;
 }
 
 .img-thumbnail:hover {
-   transform: scale(1.05);
+    transform: scale(1.05);
 }
 
 pre {
-   white-space: pre-wrap;
-   word-wrap: break-word;
-   font-size: 0.875rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 0.875rem;
 }
 
 code {
-   font-size: 0.875rem;
-   color: #d63384;
-   background-color: #f8f9fa;
-   padding: 2px 4px;
-   border-radius: 3px;
+    font-size: 0.875rem;
+    color: #d63384;
+    background-color: #f8f9fa;
+    padding: 2px 4px;
+    border-radius: 3px;
 }
 
 /* Status badge colors */

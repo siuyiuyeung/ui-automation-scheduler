@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Automation Result Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h4>Automation Execution Details</h4>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>Configuration Info</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4">Name:</dt>
+                        <dd class="col-sm-8" th:text="${result.config.name}"></dd>
+
+                        <dt class="col-sm-4">Description:</dt>
+                        <dd class="col-sm-8" th:text="${result.config.description ?: 'N/A'}"></dd>
+
+                        <dt class="col-sm-4">Active:</dt>
+                        <dd class="col-sm-8">
+                                <span class="badge"
+                                      th:classappend="${result.config.active ? 'bg-success' : 'bg-secondary'}"
+                                      th:text="${result.config.active ? 'Yes' : 'No'}"></span>
+                        </dd>
+                    </dl>
+                </div>
+
+                <div class="col-md-6">
+                    <h5>Execution Info</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4">Status:</dt>
+                        <dd class="col-sm-8">
+                                <span class="badge"
+                                      th:classappend="${result.status.name() == 'SUCCESS' ? 'bg-success' :
+                                                      (result.status.name() == 'FAILED' ? 'bg-danger' :
+                                                      (result.status.name() == 'RUNNING' ? 'bg-primary' : 'bg-secondary'))}"
+                                      th:text="${result.status}"></span>
+                        </dd>
+
+                        <dt class="col-sm-4">Start Time:</dt>
+                        <dd class="col-sm-8" th:text="${#temporals.format(result.startTime, 'yyyy-MM-dd HH:mm:ss')}"></dd>
+
+                        <dt class="col-sm-4">End Time:</dt>
+                        <dd class="col-sm-8" th:text="${result.endTime != null ? #temporals.format(result.endTime, 'yyyy-MM-dd HH:mm:ss') : 'N/A'}"></dd>
+
+                        <dt class="col-sm-4">Duration:</dt>
+                        <dd class="col-sm-8" th:if="${result.endTime != null}"
+                            th:text="${#numbers.formatDecimal((result.endTime.toEpochSecond() - result.startTime.toEpochSecond()), 0, 'COMMA', 0, 'POINT')} + ' seconds'"></dd>
+                        <dd class="col-sm-8" th:unless="${result.endTime != null}">N/A</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="mb-4" th:if="${result.errorMessage != null}">
+                <div class="alert alert-danger">
+                    <h6>Error Message:</h6>
+                    <pre class="mb-0" th:text="${result.errorMessage}"></pre>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h5>Execution Logs</h5>
+                <div class="bg-light p-3 rounded" style="max-height: 400px; overflow-y: auto;">
+                    <pre class="mb-0" th:text="${result.logs ?: 'No logs available'}"></pre>
+                </div>
+            </div>
+
+            <div class="mb-4" th:if="${result.screenshotPaths != null and !result.screenshotPaths.isEmpty()}">
+                <h5>Screenshots</h5>
+                <div class="row">
+                    <div class="col-md-4 mb-3" th:each="screenshot, iter : ${result.screenshotPaths}">
+                        <div class="card">
+                            <img th:src="@{/api/history/{id}/screenshot/{index}(id=${result.id}, index=${iter.index})}"
+                                 class="card-img-top"
+                                 th:alt="'Screenshot ' + ${iter.count}"
+                                 style="cursor: pointer;"
+                                 th:onclick="'window.open(\'/api/history/' + ${result.id} + '/screenshot/' + ${iter.index} + '\', \'_blank\')'">
+                            <div class="card-body p-2">
+                                <small class="text-muted" th:text="'Screenshot ' + ${iter.count}"></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h5>Automation Steps</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Order</th>
+                            <th>Type</th>
+                            <th>Selector</th>
+                            <th>Value</th>
+                            <th>Wait (s)</th>
+                            <th>Capture</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="step : ${result.config.steps}">
+                            <td th:text="${step.order}"></td>
+                            <td>
+                                <span class="badge bg-info text-dark" th:text="${step.type}"></span>
+                            </td>
+                            <td>
+                                <code th:text="${step.selector ?: '-'}"></code>
+                            </td>
+                            <td th:text="${step.value ?: '-'}"></td>
+                            <td th:text="${step.waitSeconds}"></td>
+                            <td>
+                                <span th:if="${step.captureScreenshot}" class="text-success">✓</span>
+                                <span th:unless="${step.captureScreenshot}">-</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="text-end">
+                <a href="/" class="btn btn-secondary">Back to Dashboard</a>
+                <button class="btn btn-danger" th:onclick="'deleteResult(' + ${result.id} + ')'">Delete Result</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function deleteResult(id) {
+        if (confirm('Are you sure you want to delete this result?')) {
+            fetch('/api/history/' + id, { method: 'DELETE' })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = '/';
+                    } else {
+                        alert('Failed to delete result');
+                    }
+                });
+        }
+    }
+</script>
+</body>
+</html>

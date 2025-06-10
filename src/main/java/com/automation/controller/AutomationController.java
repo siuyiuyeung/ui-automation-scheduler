@@ -7,8 +7,10 @@ import com.automation.model.AutomationStep;
 import com.automation.model.ScheduleConfig;
 import com.automation.repository.AutomationConfigRepository;
 import com.automation.service.AutomationService;
+import com.automation.service.ConfigurationService;
 import com.automation.service.SchedulerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
@@ -23,6 +25,7 @@ public class AutomationController {
     private final AutomationConfigRepository configRepository;
     private final AutomationService automationService;
     private final SchedulerService schedulerService;
+    private final ConfigurationService configurationService;
 
     @GetMapping("/configs")
     public List<AutomationConfig> getAllConfigs() {
@@ -138,13 +141,43 @@ public class AutomationController {
     }
 
     @DeleteMapping("/configs/{id}")
-    public ResponseEntity<Void> deleteConfig(@PathVariable Long id) {
-        if (configRepository.existsById(id)) {
-            schedulerService.unscheduleAutomation(id);
-            configRepository.deleteById(id);
-            return ResponseEntity.ok().build();
+    public ResponseEntity<Map<String, Object>> deleteConfig(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "false") boolean force) {
+
+        if (!configRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.notFound().build();
+
+        // Check if there are associated results
+        long resultCount = configurationService.countResultsForConfig(id);
+
+        if (resultCount > 0 && !force) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("error", "Cannot delete configuration");
+            response.put("message", String.format(
+                    "This configuration has %d execution results. " +
+                            "Delete the results first or use force=true to delete everything.",
+                    resultCount));
+            response.put("resultCount", resultCount);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        }
+
+        try {
+            configurationService.deleteConfiguration(id, force);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Configuration deleted successfully");
+            response.put("deletedResults", force ? resultCount : 0);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("error", "Failed to delete configuration");
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
     @PostMapping("/configs/{id}/run")

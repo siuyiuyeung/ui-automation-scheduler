@@ -198,11 +198,40 @@ async function toggleActive(configId) {
 }
 
 async function deleteConfig(configId) {
-    if (confirm('Are you sure you want to delete this configuration?')) {
-        const response = await fetch(`/api/automation/configs/${configId}`, { method: 'DELETE' });
-        if (response.ok) {
-            loadConfigs();
+    if (!confirm('Are you sure you want to delete this configuration?')) {
+        return;
+    }
+
+    try {
+        // First try to delete without force
+        let response = await fetch(`/api/automation/configs/${configId}`, { method: 'DELETE' });
+
+        if (response.status === 409) {
+            // Conflict - has results
+            const data = await response.json();
+            const forceDelete = confirm(
+                `${data.message}\n\n` +
+                `Do you want to delete the configuration and all ${data.resultCount} execution results?`
+            );
+
+            if (forceDelete) {
+                response = await fetch(`/api/automation/configs/${configId}?force=true`, { method: 'DELETE' });
+            } else {
+                return;
+            }
         }
+
+        if (response.ok) {
+            const result = await response.json();
+            alert(result.message || 'Configuration deleted successfully');
+            loadConfigs();
+            loadHistory();
+        } else {
+            const error = await response.json();
+            alert('Failed to delete: ' + (error.message || 'Unknown error'));
+        }
+    } catch (error) {
+        alert('Error deleting configuration: ' + error.message);
     }
 }
 

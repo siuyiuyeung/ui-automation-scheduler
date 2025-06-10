@@ -12,4 +12,6 @@ public interface AutomationResultRepository extends JpaRepository<AutomationResu
     Page<AutomationResult> findByConfigId(Long configId, Pageable pageable);
     Page<AutomationResult> findByStartTimeBetween(LocalDateTime start, LocalDateTime end, Pageable pageable);
     Page<AutomationResult> findByStatus(AutomationResult.Status status, Pageable pageable);
-} 
+    long countByConfigId(Long configId);
+    void deleteByConfigId(Long configId);
+}
