@@ -1,5 +1,6 @@
 package com.automation.controller;
 
+import com.automation.dto.AutomationResultDTO;
 import com.automation.model.AutomationResult;
 import com.automation.repository.AutomationResultRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class HistoryController {
     private final AutomationResultRepository resultRepository;
 
     @GetMapping
-    public Page<AutomationResult> getHistory(
+    public Page<AutomationResultDTO> getHistory(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) Long configId,
@@ -32,22 +33,25 @@ public class HistoryController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
 
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by("startTime").descending());
+        Page<AutomationResult> results;
 
         if (configId != null) {
-            return resultRepository.findByConfigId(configId, pageRequest);
+            results = resultRepository.findByConfigId(configId, pageRequest);
         } else if (status != null) {
-            return resultRepository.findByStatus(status, pageRequest);
+            results = resultRepository.findByStatus(status, pageRequest);
         } else if (startDate != null && endDate != null) {
-            return resultRepository.findByStartTimeBetween(startDate, endDate, pageRequest);
+            results = resultRepository.findByStartTimeBetween(startDate, endDate, pageRequest);
         } else {
-            return resultRepository.findAll(pageRequest);
+            results = resultRepository.findAll(pageRequest);
         }
+
+        return results.map(AutomationResultDTO::fromEntity);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AutomationResult> getResult(@PathVariable Long id) {
+    public ResponseEntity<AutomationResultDTO> getResult(@PathVariable Long id) {
         return resultRepository.findById(id)
-                .map(ResponseEntity::ok)
+                .map(result -> ResponseEntity.ok(AutomationResultDTO.fromEntity(result)))
                 .orElse(ResponseEntity.notFound().build());
     }
 

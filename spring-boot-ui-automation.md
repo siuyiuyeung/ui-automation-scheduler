@@ -52,102 +52,102 @@ ui-automation-scheduler/
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.0</version>
-        <relativePath/>
-    </parent>
-    
-    <groupId>com.automation</groupId>
-    <artifactId>ui-automation-scheduler</artifactId>
-    <version>1.0.0</version>
-    <name>UI Automation Scheduler</name>
-    
-    <properties>
-        <java.version>24</java.version>
-        <selenium.version>4.20.0</selenium.version>
-    </properties>
-    
-    <dependencies>
-        <!-- Spring Boot Starters -->
-        <dependency>
+   <modelVersion>4.0.0</modelVersion>
+
+   <parent>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-parent</artifactId>
+      <version>3.3.0</version>
+      <relativePath/>
+   </parent>
+
+   <groupId>com.automation</groupId>
+   <artifactId>ui-automation-scheduler</artifactId>
+   <version>1.0.0</version>
+   <name>UI Automation Scheduler</name>
+
+   <properties>
+      <java.version>24</java.version>
+      <selenium.version>4.20.0</selenium.version>
+   </properties>
+
+   <dependencies>
+      <!-- Spring Boot Starters -->
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-web</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-data-jpa</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-thymeleaf</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-validation</artifactId>
+      </dependency>
+
+      <!-- No Quartz dependency needed, using Spring's built-in scheduling -->
+
+      <!-- Database -->
+      <dependency>
+         <groupId>com.h2database</groupId>
+         <artifactId>h2</artifactId>
+         <scope>runtime</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.postgresql</groupId>
+         <artifactId>postgresql</artifactId>
+         <scope>runtime</scope>
+      </dependency>
+
+      <!-- Selenium -->
+      <dependency>
+         <groupId>org.seleniumhq.selenium</groupId>
+         <artifactId>selenium-java</artifactId>
+         <version>${selenium.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.seleniumhq.selenium</groupId>
+         <artifactId>selenium-devtools-v129</artifactId>
+         <version>${selenium.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>io.github.bonigarcia</groupId>
+         <artifactId>webdrivermanager</artifactId>
+         <version>5.8.0</version>
+      </dependency>
+
+      <!-- Utilities -->
+      <dependency>
+         <groupId>org.projectlombok</groupId>
+         <artifactId>lombok</artifactId>
+         <optional>true</optional>
+      </dependency>
+      <dependency>
+         <groupId>com.fasterxml.jackson.datatype</groupId>
+         <artifactId>jackson-datatype-jsr310</artifactId>
+      </dependency>
+
+      <!-- Test -->
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-test</artifactId>
+         <scope>test</scope>
+      </dependency>
+   </dependencies>
+
+   <build>
+      <plugins>
+         <plugin>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-validation</artifactId>
-        </dependency>
-        
-        <!-- No Quartz dependency needed, using Spring's built-in scheduling -->
-        
-        <!-- Database -->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        
-        <!-- Selenium -->
-        <dependency>
-            <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-java</artifactId>
-            <version>${selenium.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-devtools-v129</artifactId>
-            <version>${selenium.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.bonigarcia</groupId>
-            <artifactId>webdrivermanager</artifactId>
-            <version>5.8.0</version>
-        </dependency>
-        
-        <!-- Utilities -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-        </dependency>
-        
-        <!-- Test -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-    
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+         </plugin>
+      </plugins>
+   </build>
 </project>
 ```
 
@@ -163,9 +163,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 public class UiAutomationApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(UiAutomationApplication.class, args);
-    }
+   public static void main(String[] args) {
+      SpringApplication.run(UiAutomationApplication.class, args);
+   }
 }
 ```
 
@@ -177,40 +177,48 @@ package com.automation.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Data
 @Table(name = "automation_configs")
+@EqualsAndHashCode(exclude = {"steps", "schedule", "results"})
+@ToString(exclude = {"results"})
 public class AutomationConfig {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @Column(nullable = false)
-    private String name;
-    
-    private String description;
-    
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    @JoinColumn(name = "config_id")
-    private List<AutomationStep> steps;
-    
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "schedule_id")
-    private ScheduleConfig schedule;
-    
-    @OneToMany(mappedBy = "config", cascade = CascadeType.REMOVE)
-    private List<AutomationResult> results;
-    
-    private boolean active = true;
-    
-    @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
-    
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt = LocalDateTime.now();
+   @Id
+   @GeneratedValue(strategy = GenerationType.IDENTITY)
+   private Long id;
+
+   @Column(nullable = false)
+   private String name;
+
+   private String description;
+
+   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+   @JoinColumn(name = "config_id")
+   @JsonManagedReference
+   private List<AutomationStep> steps;
+
+   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+   @JoinColumn(name = "schedule_id")
+   private ScheduleConfig schedule;
+
+   @OneToMany(mappedBy = "config", cascade = CascadeType.REMOVE)
+   @JsonIgnore
+   private List<AutomationResult> results;
+
+   private boolean active = true;
+
+   @Column(name = "created_at")
+   private LocalDateTime createdAt = LocalDateTime.now();
+
+   @Column(name = "updated_at")
+   private LocalDateTime updatedAt = LocalDateTime.now();
 }
 ```
 
@@ -220,10 +228,13 @@ package com.automation.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Data
 @Table(name = "automation_steps")
+@EqualsAndHashCode(exclude = {"config"})
 public class AutomationStep {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -250,6 +261,11 @@ public class AutomationStep {
     
     @Column(name = "capture_selector")
     private String captureSelector; // Specific area to capture
+    
+    @ManyToOne
+    @JoinColumn(name = "config_id")
+    @JsonBackReference
+    private AutomationConfig config;
     
     public enum StepType {
         NAVIGATE, CLICK, INPUT, WAIT, SCREENSHOT, SCROLL, SELECT
@@ -1055,7 +1071,7 @@ public class HistoryController {
     private final AutomationResultRepository resultRepository;
     
     @GetMapping
-    public Page<AutomationResult> getHistory(
+    public Page<AutomationResultDTO> getHistory(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) Long configId,
@@ -1064,22 +1080,25 @@ public class HistoryController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
         
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by("startTime").descending());
+        Page<AutomationResult> results;
         
         if (configId != null) {
-            return resultRepository.findByConfigId(configId, pageRequest);
+            results = resultRepository.findByConfigId(configId, pageRequest);
         } else if (status != null) {
-            return resultRepository.findByStatus(status, pageRequest);
+            results = resultRepository.findByStatus(status, pageRequest);
         } else if (startDate != null && endDate != null) {
-            return resultRepository.findByStartTimeBetween(startDate, endDate, pageRequest);
+            results = resultRepository.findByStartTimeBetween(startDate, endDate, pageRequest);
         } else {
-            return resultRepository.findAll(pageRequest);
+            results = resultRepository.findAll(pageRequest);
         }
+        
+        return results.map(AutomationResultDTO::fromEntity);
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<AutomationResult> getResult(@PathVariable Long id) {
+    public ResponseEntity<AutomationResultDTO> getResult(@PathVariable Long id) {
         return resultRepository.findById(id)
-            .map(ResponseEntity::ok)
+            .map(result -> ResponseEntity.ok(AutomationResultDTO.fromEntity(result)))
             .orElse(ResponseEntity.notFound().build());
     }
     
@@ -1196,12 +1215,37 @@ public class AutomationResultDTO {
     private Long id;
     private Long configId;
     private String configName;
+    private String configDescription;
     private AutomationResult.Status status;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String logs;
     private List<String> screenshotPaths;
     private String errorMessage;
+    private List<AutomationStepDTO> steps;
+    
+    public static AutomationResultDTO fromEntity(AutomationResult result) {
+        AutomationResultDTO dto = new AutomationResultDTO();
+        dto.setId(result.getId());
+        dto.setConfigId(result.getConfig().getId());
+        dto.setConfigName(result.getConfig().getName());
+        dto.setConfigDescription(result.getConfig().getDescription());
+        dto.setStatus(result.getStatus());
+        dto.setStartTime(result.getStartTime());
+        dto.setEndTime(result.getEndTime());
+        dto.setLogs(result.getLogs());
+        dto.setScreenshotPaths(result.getScreenshotPaths());
+        dto.setErrorMessage(result.getErrorMessage());
+        
+        // Convert steps
+        if (result.getConfig().getSteps() != null) {
+            dto.setSteps(result.getConfig().getSteps().stream()
+                .map(AutomationStepDTO::fromEntity)
+                .toList());
+        }
+        
+        return dto;
+    }
 }
 ```
 
@@ -1413,14 +1457,14 @@ public class SeleniumConfig {
 ```javascript
 // Load configurations
 async function loadConfigs() {
-    const response = await fetch('/api/automation/configs');
-    const configs = await response.json();
-    
-    const container = document.getElementById('configsList');
-    container.innerHTML = '';
-    
-    configs.forEach(config => {
-        const card = `
+   const response = await fetch('/api/automation/configs');
+   const configs = await response.json();
+
+   const container = document.getElementById('configsList');
+   container.innerHTML = '';
+
+   configs.forEach(config => {
+      const card = `
             <div class="col-md-4 mb-3">
                 <div class="card">
                     <div class="card-body">
@@ -1440,26 +1484,26 @@ async function loadConfigs() {
                 </div>
             </div>
         `;
-        container.innerHTML += card;
-    });
+      container.innerHTML += card;
+   });
 }
 
 // Load history
 async function loadHistory() {
-    const response = await fetch('/api/history');
-    const data = await response.json();
-    
-    const tbody = document.getElementById('historyTable');
-    tbody.innerHTML = '';
-    
-    data.content.forEach(result => {
-        const duration = result.endTime ? 
-            Math.round((new Date(result.endTime) - new Date(result.startTime)) / 1000) + 's' : 
-            'Running...';
-        
-        const row = `
+   const response = await fetch('/api/history');
+   const data = await response.json();
+
+   const tbody = document.getElementById('historyTable');
+   tbody.innerHTML = '';
+
+   data.content.forEach(result => {
+      const duration = result.endTime ?
+              Math.round((new Date(result.endTime) - new Date(result.startTime)) / 1000) + 's' :
+              'Running...';
+
+      const row = `
             <tr>
-                <td>${result.config.name}</td>
+                <td>${result.configName}</td>
                 <td>
                     <span class="badge bg-${getStatusColor(result.status)}">
                         ${result.status}
@@ -1472,22 +1516,22 @@ async function loadHistory() {
                 </td>
             </tr>
         `;
-        tbody.innerHTML += row;
-    });
+      tbody.innerHTML += row;
+   });
 }
 
 async function viewDetails(resultId) {
-    try {
-        const response = await fetch(`/api/history/${resultId}`);
-        if (!response.ok) throw new Error('Failed to fetch details');
-        
-        const result = await response.json();
-        
-        let screenshotsHtml = '';
-        if (result.screenshotPaths && result.screenshotPaths.length > 0) {
-            screenshotsHtml = '<h6>Screenshots:</h6><div class="row">';
-            result.screenshotPaths.forEach((path, index) => {
-                screenshotsHtml += `
+   try {
+      const response = await fetch(`/api/history/${resultId}`);
+      if (!response.ok) throw new Error('Failed to fetch details');
+
+      const result = await response.json();
+
+      let screenshotsHtml = '';
+      if (result.screenshotPaths && result.screenshotPaths.length > 0) {
+         screenshotsHtml = '<h6>Screenshots:</h6><div class="row">';
+         result.screenshotPaths.forEach((path, index) => {
+            screenshotsHtml += `
                     <div class="col-md-4 mb-3">
                         <img src="/api/history/${resultId}/screenshot/${index}" 
                              class="img-fluid img-thumbnail" 
@@ -1497,20 +1541,20 @@ async function viewDetails(resultId) {
                         <small class="text-muted d-block mt-1">Screenshot ${index + 1}</small>
                     </div>
                 `;
-            });
-            screenshotsHtml += '</div>';
-        }
-        
-        const duration = result.endTime ? 
-            Math.round((new Date(result.endTime) - new Date(result.startTime)) / 1000) : 
-            'N/A';
-        
-        const detailsHtml = `
+         });
+         screenshotsHtml += '</div>';
+      }
+
+      const duration = result.endTime ?
+              Math.round((new Date(result.endTime) - new Date(result.startTime)) / 1000) :
+              'N/A';
+
+      const detailsHtml = `
             <div class="row mb-4">
                 <div class="col-md-6">
                     <h6>Configuration:</h6>
-                    <p><strong>Name:</strong> ${result.config.name}</p>
-                    <p><strong>Description:</strong> ${result.config.description || 'N/A'}</p>
+                    <p><strong>Name:</strong> ${result.configName}</p>
+                    <p><strong>Description:</strong> ${result.configDescription || 'N/A'}</p>
                 </div>
                 <div class="col-md-6">
                     <h6>Execution Info:</h6>
@@ -1554,7 +1598,7 @@ async function viewDetails(resultId) {
                             </tr>
                         </thead>
                         <tbody>
-                            ${result.config.steps.map(step => `
+                            ${result.steps ? result.steps.map(step => `
                                 <tr>
                                     <td>${step.order}</td>
                                     <td>${step.type}</td>
@@ -1563,97 +1607,97 @@ async function viewDetails(resultId) {
                                     <td>${step.waitSeconds}s</td>
                                     <td>${step.captureScreenshot ? '✓' : '-'}</td>
                                 </tr>
-                            `).join('')}
+                            `).join('') : '<tr><td colspan="6">No steps available</td></tr>'}
                         </tbody>
                     </table>
                 </div>
             </div>
         `;
-        
-        document.getElementById('detailsContent').innerHTML = detailsHtml;
-        const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
-        modal.show();
-        
-    } catch (error) {
-        alert('Failed to load details: ' + error.message);
-    }
+
+      document.getElementById('detailsContent').innerHTML = detailsHtml;
+      const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
+      modal.show();
+
+   } catch (error) {
+      alert('Failed to load details: ' + error.message);
+   }
 }
 
 function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+   const div = document.createElement('div');
+   div.textContent = text;
+   return div.innerHTML;
 }
 
 // Helper functions
 function getStatusColor(status) {
-    switch(status) {
-        case 'SUCCESS': return 'success';
-        case 'FAILED': return 'danger';
-        case 'RUNNING': return 'primary';
-        default: return 'secondary';
-    }
+   switch(status) {
+      case 'SUCCESS': return 'success';
+      case 'FAILED': return 'danger';
+      case 'RUNNING': return 'primary';
+      default: return 'secondary';
+   }
 }
 
 async function runNow(configId) {
-    const response = await fetch(`/api/automation/configs/${configId}/run`, { method: 'POST' });
-    if (response.ok) {
-        alert('Automation started!');
-        loadHistory();
-    }
+   const response = await fetch(`/api/automation/configs/${configId}/run`, { method: 'POST' });
+   if (response.ok) {
+      alert('Automation started!');
+      loadHistory();
+   }
 }
 
 async function toggleActive(configId) {
-    const response = await fetch(`/api/automation/configs/${configId}/toggle`, { method: 'POST' });
-    if (response.ok) {
-        loadConfigs();
-    }
+   const response = await fetch(`/api/automation/configs/${configId}/toggle`, { method: 'POST' });
+   if (response.ok) {
+      loadConfigs();
+   }
 }
 
 async function deleteConfig(configId) {
-    if (!confirm('Are you sure you want to delete this configuration?')) {
-        return;
-    }
-    
-    try {
-        // First try to delete without force
-        let response = await fetch(`/api/automation/configs/${configId}`, { method: 'DELETE' });
-        
-        if (response.status === 409) {
-            // Conflict - has results
-            const data = await response.json();
-            const forceDelete = confirm(
-                `${data.message}\n\n` +
-                `Do you want to delete the configuration and all ${data.resultCount} execution results?`
-            );
-            
-            if (forceDelete) {
-                response = await fetch(`/api/automation/configs/${configId}?force=true`, { method: 'DELETE' });
-            } else {
-                return;
-            }
-        }
-        
-        if (response.ok) {
-            const result = await response.json();
-            alert(result.message || 'Configuration deleted successfully');
-            loadConfigs();
-            loadHistory();
-        } else {
-            const error = await response.json();
-            alert('Failed to delete: ' + (error.message || 'Unknown error'));
-        }
-    } catch (error) {
-        alert('Error deleting configuration: ' + error.message);
-    }
+   if (!confirm('Are you sure you want to delete this configuration?')) {
+      return;
+   }
+
+   try {
+      // First try to delete without force
+      let response = await fetch(`/api/automation/configs/${configId}`, { method: 'DELETE' });
+
+      if (response.status === 409) {
+         // Conflict - has results
+         const data = await response.json();
+         const forceDelete = confirm(
+                 `${data.message}\n\n` +
+                 `Do you want to delete the configuration and all ${data.resultCount} execution results?`
+         );
+
+         if (forceDelete) {
+            response = await fetch(`/api/automation/configs/${configId}?force=true`, { method: 'DELETE' });
+         } else {
+            return;
+         }
+      }
+
+      if (response.ok) {
+         const result = await response.json();
+         alert(result.message || 'Configuration deleted successfully');
+         loadConfigs();
+         loadHistory();
+      } else {
+         const error = await response.json();
+         alert('Failed to delete: ' + (error.message || 'Unknown error'));
+      }
+   } catch (error) {
+      alert('Error deleting configuration: ' + error.message);
+   }
 }
 
 // Step management
 let stepCount = 0;
 
 function addStep() {
-    const container = document.getElementById('stepsContainer');
-    const stepHtml = `
+   const container = document.getElementById('stepsContainer');
+   const stepHtml = `
         <div class="card mb-2" id="step-${stepCount}">
             <div class="card-body">
                 <div class="row">
@@ -1678,201 +1722,201 @@ function addStep() {
             </div>
         </div>
     `;
-    container.innerHTML += stepHtml;
-    stepCount++;
+   container.innerHTML += stepHtml;
+   stepCount++;
 }
 
 function updateStepFields(stepId) {
-    const stepType = document.querySelector(`#step-${stepId} .step-type`).value;
-    const fieldsContainer = document.getElementById(`stepFields-${stepId}`);
-    
-    let fields = '';
-    switch(stepType) {
-        case 'NAVIGATE':
-            fields = '<input type="text" class="form-control" placeholder="URL (e.g., https://example.com or example.com)" data-field="value" required>';
-            break;
-        case 'CLICK':
-            fields = '<input type="text" class="form-control" placeholder="CSS Selector (e.g., #submit-button, .btn-primary)" data-field="selector" required>';
-            break;
-        case 'INPUT':
-            fields = `
+   const stepType = document.querySelector(`#step-${stepId} .step-type`).value;
+   const fieldsContainer = document.getElementById(`stepFields-${stepId}`);
+
+   let fields = '';
+   switch(stepType) {
+      case 'NAVIGATE':
+         fields = '<input type="text" class="form-control" placeholder="URL (e.g., https://example.com or example.com)" data-field="value" required>';
+         break;
+      case 'CLICK':
+         fields = '<input type="text" class="form-control" placeholder="CSS Selector (e.g., #submit-button, .btn-primary)" data-field="selector" required>';
+         break;
+      case 'INPUT':
+         fields = `
                 <input type="text" class="form-control mb-2" placeholder="CSS Selector (e.g., #username, input[name=\'email\'])" data-field="selector" required>
                 <input type="text" class="form-control" placeholder="Text to input" data-field="value">
             `;
-            break;
-        case 'WAIT':
-            fields = '<input type="number" class="form-control" placeholder="Seconds to wait" data-field="waitSeconds" min="1" value="1">';
-            break;
-        case 'SCREENSHOT':
-            fields = '<input type="text" class="form-control" placeholder="CSS Selector for specific area (optional, leave empty for full page)" data-field="captureSelector">';
-            break;
-        case 'SCROLL':
-            fields = '<input type="number" class="form-control" placeholder="Scroll position in pixels (e.g., 500)" data-field="value" value="0">';
-            break;
-        case 'SELECT':
-            fields = `
+         break;
+      case 'WAIT':
+         fields = '<input type="number" class="form-control" placeholder="Seconds to wait" data-field="waitSeconds" min="1" value="1">';
+         break;
+      case 'SCREENSHOT':
+         fields = '<input type="text" class="form-control" placeholder="CSS Selector for specific area (optional, leave empty for full page)" data-field="captureSelector">';
+         break;
+      case 'SCROLL':
+         fields = '<input type="number" class="form-control" placeholder="Scroll position in pixels (e.g., 500)" data-field="value" value="0">';
+         break;
+      case 'SELECT':
+         fields = `
                 <input type="text" class="form-control mb-2" placeholder="CSS Selector (e.g., #country-select)" data-field="selector" required>
                 <input type="text" class="form-control" placeholder="Option value to select" data-field="value" required>
             `;
-            break;
-    }
-    fieldsContainer.innerHTML = fields;
+         break;
+   }
+   fieldsContainer.innerHTML = fields;
 }
 
 function removeStep(stepId) {
-    document.getElementById(`step-${stepId}`).remove();
+   document.getElementById(`step-${stepId}`).remove();
 }
 
 // Schedule fields
 function updateScheduleFields() {
-    const scheduleType = document.getElementById('scheduleType').value;
-    const container = document.getElementById('scheduleFields');
-    
-    let fields = '';
-    switch(scheduleType) {
-        case 'ONCE':
-            fields = '<input type="datetime-local" class="form-control" id="runOnceAt">';
-            break;
-        case 'INTERVAL':
-            fields = '<input type="number" class="form-control" id="intervalMinutes" placeholder="Minutes">';
-            break;
-        case 'CRON':
-            fields = '<input type="text" class="form-control" id="cronExpression" placeholder="0 0 * * * ?">';
-            break;
-    }
-    container.innerHTML = fields;
+   const scheduleType = document.getElementById('scheduleType').value;
+   const container = document.getElementById('scheduleFields');
+
+   let fields = '';
+   switch(scheduleType) {
+      case 'ONCE':
+         fields = '<input type="datetime-local" class="form-control" id="runOnceAt">';
+         break;
+      case 'INTERVAL':
+         fields = '<input type="number" class="form-control" id="intervalMinutes" placeholder="Minutes">';
+         break;
+      case 'CRON':
+         fields = '<input type="text" class="form-control" id="cronExpression" placeholder="0 0 * * * ?">';
+         break;
+   }
+   container.innerHTML = fields;
 }
 
 // Form submission
 document.getElementById('configForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    // Validate form
-    const name = document.getElementById('configName').value.trim();
-    if (!name) {
-        alert('Configuration name is required');
-        return;
-    }
-    
-    const steps = [];
-    const stepDivs = document.querySelectorAll('[id^="step-"]');
-    
-    if (stepDivs.length === 0) {
-        alert('At least one step is required');
-        return;
-    }
-    
-    // Validate and collect steps
-    for (let index = 0; index < stepDivs.length; index++) {
-        const stepDiv = stepDivs[index];
-        const type = stepDiv.querySelector('.step-type').value;
-        const step = {
-            order: index,
-            type: type
-        };
-        
-        // Collect all fields
-        stepDiv.querySelectorAll('[data-field]').forEach(input => {
-            step[input.dataset.field] = input.value;
-        });
-        
-        // Validate required fields based on step type
-        let error = null;
-        switch (type) {
-            case 'NAVIGATE':
-                if (!step.value || !step.value.trim()) {
-                    error = `Step ${index + 1} (Navigate): URL is required`;
-                }
-                break;
-            case 'CLICK':
-                if (!step.selector || !step.selector.trim()) {
-                    error = `Step ${index + 1} (Click): CSS Selector is required`;
-                }
-                break;
-            case 'INPUT':
-                if (!step.selector || !step.selector.trim()) {
-                    error = `Step ${index + 1} (Input): CSS Selector is required`;
-                }
-                break;
-            case 'SELECT':
-                if (!step.selector || !step.selector.trim()) {
-                    error = `Step ${index + 1} (Select): CSS Selector is required`;
-                }
-                if (!step.value || !step.value.trim()) {
-                    error = `Step ${index + 1} (Select): Option value is required`;
-                }
-                break;
-        }
-        
-        if (error) {
-            alert(error);
-            return;
-        }
-        
-        steps.push(step);
-    }
-    
-    const scheduleType = document.getElementById('scheduleType').value;
-    let schedule = null;
-    if (scheduleType) {
-        schedule = { type: scheduleType };
-        switch(scheduleType) {
-            case 'ONCE':
-                const runOnceAt = document.getElementById('runOnceAt').value;
-                if (!runOnceAt) {
-                    alert('Schedule: Run once date/time is required');
-                    return;
-                }
-                schedule.runOnceAt = runOnceAt;
-                break;
-            case 'INTERVAL':
-                const intervalMinutes = parseInt(document.getElementById('intervalMinutes').value);
-                if (!intervalMinutes || intervalMinutes <= 0) {
-                    alert('Schedule: Interval must be greater than 0');
-                    return;
-                }
-                schedule.intervalMinutes = intervalMinutes;
-                break;
-            case 'CRON':
-                const cronExpression = document.getElementById('cronExpression').value;
-                if (!cronExpression || !cronExpression.trim()) {
-                    alert('Schedule: Cron expression is required');
-                    return;
-                }
-                schedule.cronExpression = cronExpression;
-                break;
-        }
-    }
-    
-    const config = {
-        name: name,
-        description: document.getElementById('configDescription').value,
-        steps: steps,
-        schedule: schedule,
-        active: true
-    };
-    
-    try {
-        const response = await fetch('/api/automation/configs', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(config)
-        });
-        
-        if (response.ok) {
-            alert('Configuration created successfully!');
-            document.getElementById('configForm').reset();
-            document.getElementById('stepsContainer').innerHTML = '';
-            document.getElementById('scheduleFields').innerHTML = '';
-            stepCount = 0;
-            loadConfigs();
-        } else {
-            const error = await response.text();
-            alert('Failed to create configuration: ' + error);
-        }
-    } catch (error) {
-        alert('Error creating configuration: ' + error.message);
-    }
+   e.preventDefault();
+
+   // Validate form
+   const name = document.getElementById('configName').value.trim();
+   if (!name) {
+      alert('Configuration name is required');
+      return;
+   }
+
+   const steps = [];
+   const stepDivs = document.querySelectorAll('[id^="step-"]');
+
+   if (stepDivs.length === 0) {
+      alert('At least one step is required');
+      return;
+   }
+
+   // Validate and collect steps
+   for (let index = 0; index < stepDivs.length; index++) {
+      const stepDiv = stepDivs[index];
+      const type = stepDiv.querySelector('.step-type').value;
+      const step = {
+         order: index,
+         type: type
+      };
+
+      // Collect all fields
+      stepDiv.querySelectorAll('[data-field]').forEach(input => {
+         step[input.dataset.field] = input.value;
+      });
+
+      // Validate required fields based on step type
+      let error = null;
+      switch (type) {
+         case 'NAVIGATE':
+            if (!step.value || !step.value.trim()) {
+               error = `Step ${index + 1} (Navigate): URL is required`;
+            }
+            break;
+         case 'CLICK':
+            if (!step.selector || !step.selector.trim()) {
+               error = `Step ${index + 1} (Click): CSS Selector is required`;
+            }
+            break;
+         case 'INPUT':
+            if (!step.selector || !step.selector.trim()) {
+               error = `Step ${index + 1} (Input): CSS Selector is required`;
+            }
+            break;
+         case 'SELECT':
+            if (!step.selector || !step.selector.trim()) {
+               error = `Step ${index + 1} (Select): CSS Selector is required`;
+            }
+            if (!step.value || !step.value.trim()) {
+               error = `Step ${index + 1} (Select): Option value is required`;
+            }
+            break;
+      }
+
+      if (error) {
+         alert(error);
+         return;
+      }
+
+      steps.push(step);
+   }
+
+   const scheduleType = document.getElementById('scheduleType').value;
+   let schedule = null;
+   if (scheduleType) {
+      schedule = { type: scheduleType };
+      switch(scheduleType) {
+         case 'ONCE':
+            const runOnceAt = document.getElementById('runOnceAt').value;
+            if (!runOnceAt) {
+               alert('Schedule: Run once date/time is required');
+               return;
+            }
+            schedule.runOnceAt = runOnceAt;
+            break;
+         case 'INTERVAL':
+            const intervalMinutes = parseInt(document.getElementById('intervalMinutes').value);
+            if (!intervalMinutes || intervalMinutes <= 0) {
+               alert('Schedule: Interval must be greater than 0');
+               return;
+            }
+            schedule.intervalMinutes = intervalMinutes;
+            break;
+         case 'CRON':
+            const cronExpression = document.getElementById('cronExpression').value;
+            if (!cronExpression || !cronExpression.trim()) {
+               alert('Schedule: Cron expression is required');
+               return;
+            }
+            schedule.cronExpression = cronExpression;
+            break;
+      }
+   }
+
+   const config = {
+      name: name,
+      description: document.getElementById('configDescription').value,
+      steps: steps,
+      schedule: schedule,
+      active: true
+   };
+
+   try {
+      const response = await fetch('/api/automation/configs', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify(config)
+      });
+
+      if (response.ok) {
+         alert('Configuration created successfully!');
+         document.getElementById('configForm').reset();
+         document.getElementById('stepsContainer').innerHTML = '';
+         document.getElementById('scheduleFields').innerHTML = '';
+         stepCount = 0;
+         loadConfigs();
+      } else {
+         const error = await response.text();
+         alert('Failed to create configuration: ' + error);
+      }
+   } catch (error) {
+      alert('Error creating configuration: ' + error.message);
+   }
 });
 
 // Initial load
@@ -1886,59 +1930,59 @@ setInterval(loadHistory, 10000);
 ### static/css/style.css
 ```css
 body {
-    background-color: #f8f9fa;
+   background-color: #f8f9fa;
 }
 
 .card {
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    transition: transform 0.2s;
+   box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+   transition: transform 0.2s;
 }
 
 .card:hover {
-    transform: translateY(-5px);
+   transform: translateY(-5px);
 }
 
 .navbar-brand {
-    font-weight: bold;
+   font-weight: bold;
 }
 
 #stepsContainer .card {
-    background-color: #f1f3f5;
+   background-color: #f1f3f5;
 }
 
 .table {
-    background-color: white;
+   background-color: white;
 }
 
 .badge {
-    padding: 0.5em 1em;
+   padding: 0.5em 1em;
 }
 
 /* Modal styles */
 .modal-xl {
-    max-width: 90%;
+   max-width: 90%;
 }
 
 .img-thumbnail {
-    transition: transform 0.2s;
+   transition: transform 0.2s;
 }
 
 .img-thumbnail:hover {
-    transform: scale(1.05);
+   transform: scale(1.05);
 }
 
 pre {
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    font-size: 0.875rem;
+   white-space: pre-wrap;
+   word-wrap: break-word;
+   font-size: 0.875rem;
 }
 
 code {
-    font-size: 0.875rem;
-    color: #d63384;
-    background-color: #f8f9fa;
-    padding: 2px 4px;
-    border-radius: 3px;
+   font-size: 0.875rem;
+   color: #d63384;
+   background-color: #f8f9fa;
+   padding: 2px 4px;
+   border-radius: 3px;
 }
 
 /* Status badge colors */

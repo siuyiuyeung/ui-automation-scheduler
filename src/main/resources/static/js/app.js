@@ -46,7 +46,7 @@ async function loadHistory() {
 
         const row = `
             <tr>
-                <td>${result.config.name}</td>
+                <td>${result.configName}</td>
                 <td>
                     <span class="badge bg-${getStatusColor(result.status)}">
                         ${result.status}
@@ -96,8 +96,8 @@ async function viewDetails(resultId) {
             <div class="row mb-4">
                 <div class="col-md-6">
                     <h6>Configuration:</h6>
-                    <p><strong>Name:</strong> ${result.config.name}</p>
-                    <p><strong>Description:</strong> ${result.config.description || 'N/A'}</p>
+                    <p><strong>Name:</strong> ${result.configName}</p>
+                    <p><strong>Description:</strong> ${result.configDescription || 'N/A'}</p>
                 </div>
                 <div class="col-md-6">
                     <h6>Execution Info:</h6>
@@ -141,7 +141,7 @@ async function viewDetails(resultId) {
                             </tr>
                         </thead>
                         <tbody>
-                            ${result.config.steps.map(step => `
+                            ${result.steps ? result.steps.map(step => `
                                 <tr>
                                     <td>${step.order}</td>
                                     <td>${step.type}</td>
@@ -150,7 +150,7 @@ async function viewDetails(resultId) {
                                     <td>${step.waitSeconds}s</td>
                                     <td>${step.captureScreenshot ? '✓' : '-'}</td>
                                 </tr>
-                            `).join('')}
+                            `).join('') : '<tr><td colspan="6">No steps available</td></tr>'}
                         </tbody>
                     </table>
                 </div>

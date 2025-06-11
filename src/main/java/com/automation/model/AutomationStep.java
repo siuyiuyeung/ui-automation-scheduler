@@ -2,10 +2,13 @@ package com.automation.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Data
 @Table(name = "automation_steps")
+@EqualsAndHashCode(exclude = {"config"})
 public class AutomationStep {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,6 +35,11 @@ public class AutomationStep {
 
     @Column(name = "capture_selector")
     private String captureSelector; // Specific area to capture
+
+    @ManyToOne
+    @JoinColumn(name = "config_id")
+    @JsonBackReference
+    private AutomationConfig config;
 
     public enum StepType {
         NAVIGATE, CLICK, INPUT, WAIT, SCREENSHOT, SCROLL, SELECT
