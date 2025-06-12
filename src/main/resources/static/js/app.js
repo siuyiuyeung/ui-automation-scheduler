@@ -33,34 +33,115 @@ async function loadConfigs() {
 
 // Load history
 async function loadHistory() {
-    const response = await fetch('/api/history');
-    const data = await response.json();
+    try {
+        const response = await fetch('/api/history');
+        const data = await response.json();
 
-    const tbody = document.getElementById('historyTable');
-    tbody.innerHTML = '';
+        const tbody = document.getElementById('historyTable');
+        tbody.innerHTML = '';
 
-    data.content.forEach(result => {
-        const duration = result.endTime ?
-            Math.round((new Date(result.endTime) - new Date(result.startTime)) / 1000) + 's' :
-            'Running...';
+        // Debug: log first result to check date format
+        if (data.content.length > 0) {
+            console.log('Sample result:', data.content[0]);
+            console.log('Start time:', data.content[0].startTime);
+        }
 
-        const row = `
-            <tr>
-                <td>${result.configName}</td>
-                <td>
-                    <span class="badge bg-${getStatusColor(result.status)}">
-                        ${result.status}
-                    </span>
-                </td>
-                <td>${new Date(result.startTime).toLocaleString()}</td>
-                <td>${duration}</td>
-                <td>
-                    <button class="btn btn-sm btn-info" onclick="viewDetails(${result.id})">Details</button>
-                </td>
-            </tr>
-        `;
-        tbody.innerHTML += row;
-    });
+        data.content.forEach(result => {
+            let duration = 'Running...';
+            let startTimeStr = 'N/A';
+
+            if (result.startTime) {
+                // Handle different date formats
+                let startTime;
+                if (Array.isArray(result.startTime)) {
+                    // Handle array format [year, month, day, hour, minute, second, nano]
+                    const [year, month, day, hour, minute, second] = result.startTime;
+                    startTime = new Date(year, month - 1, day, hour, minute, second);
+                } else {
+                    // Handle ISO string format
+                    startTime = new Date(result.startTime);
+                }
+
+                if (!isNaN(startTime.getTime())) {
+                    startTimeStr = formatDateTime(startTime);
+
+                    if (result.endTime) {
+                        let endTime;
+                        if (Array.isArray(result.endTime)) {
+                            const [year, month, day, hour, minute, second] = result.endTime;
+                            endTime = new Date(year, month - 1, day, hour, minute, second);
+                        } else {
+                            endTime = new Date(result.endTime);
+                        }
+
+                        if (!isNaN(endTime.getTime())) {
+                            const durationMs = endTime.getTime() - startTime.getTime();
+                            duration = formatDuration(durationMs);
+                        }
+                    }
+                }
+            }
+
+            const row = `
+                <tr>
+                    <td>${result.configName || 'Unknown'}</td>
+                    <td>
+                        <span class="badge bg-${getStatusColor(result.status)}">
+                            ${result.status}
+                        </span>
+                    </td>
+                    <td>${startTimeStr}</td>
+                    <td>${duration}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info" onclick="viewDetails(${result.id})">Details</button>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    } catch (error) {
+        console.error('Error loading history:', error);
+        const tbody = document.getElementById('historyTable');
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error loading history</td></tr>';
+    }
+}
+
+// Format date time for display
+function formatDateTime(date) {
+    if (!date || isNaN(date.getTime())) {
+        return 'N/A';
+    }
+
+    const options = {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    };
+
+    return date.toLocaleDateString('en-US', options);
+}
+
+// Format duration from milliseconds
+function formatDuration(milliseconds) {
+    if (isNaN(milliseconds) || milliseconds < 0) {
+        return 'N/A';
+    }
+
+    const seconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+
+    if (hours > 0) {
+        return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
+    } else if (minutes > 0) {
+        return `${minutes}m ${seconds % 60}s`;
+    } else {
+        return `${seconds}s`;
+    }
 }
 
 async function viewDetails(resultId) {
@@ -88,9 +169,21 @@ async function viewDetails(resultId) {
             screenshotsHtml += '</div>';
         }
 
-        const duration = result.endTime ?
-            Math.round((new Date(result.endTime) - new Date(result.startTime)) / 1000) :
-            'N/A';
+        let duration = 'N/A';
+        let startTimeStr = 'N/A';
+        let endTimeStr = 'N/A';
+
+        if (result.startTime) {
+            const startTime = new Date(result.startTime);
+            startTimeStr = formatDateTime(startTime);
+
+            if (result.endTime) {
+                const endTime = new Date(result.endTime);
+                endTimeStr = formatDateTime(endTime);
+                const durationMs = endTime.getTime() - startTime.getTime();
+                duration = formatDuration(durationMs);
+            }
+        }
 
         const detailsHtml = `
             <div class="row mb-4">
@@ -104,9 +197,9 @@ async function viewDetails(resultId) {
                     <p><strong>Status:</strong> 
                         <span class="badge bg-${getStatusColor(result.status)}">${result.status}</span>
                     </p>
-                    <p><strong>Start Time:</strong> ${new Date(result.startTime).toLocaleString()}</p>
-                    <p><strong>End Time:</strong> ${result.endTime ? new Date(result.endTime).toLocaleString() : 'N/A'}</p>
-                    <p><strong>Duration:</strong> ${duration} seconds</p>
+                    <p><strong>Start Time:</strong> ${startTimeStr}</p>
+                    <p><strong>End Time:</strong> ${endTimeStr}</p>
+                    <p><strong>Duration:</strong> ${duration}</p>
                 </div>
             </div>
             
