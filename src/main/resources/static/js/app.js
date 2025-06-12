@@ -240,43 +240,72 @@ let stepCount = 0;
 
 function addStep() {
     const container = document.getElementById('stepsContainer');
-    const stepHtml = `
-        <div class="card mb-2" id="step-${stepCount}">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3">
-                        <select class="form-select step-type" onchange="updateStepFields(${stepCount})">
-                            <option value="NAVIGATE">Navigate</option>
-                            <option value="CLICK">Click</option>
-                            <option value="INPUT">Input</option>
-                            <option value="WAIT">Wait</option>
-                            <option value="SCREENSHOT">Screenshot</option>
-                            <option value="SCROLL">Scroll</option>
-                            <option value="SELECT">Select</option>
-                        </select>
+    const stepDiv = document.createElement('div');
+    stepDiv.className = 'card mb-2';
+    stepDiv.id = `step-${stepCount}`;
+
+    stepDiv.innerHTML = `
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <select class="form-select step-type" onchange="updateStepFields(${stepCount})">
+                        <option value="NAVIGATE">Navigate</option>
+                        <option value="CLICK">Click</option>
+                        <option value="INPUT">Input</option>
+                        <option value="WAIT">Wait</option>
+                        <option value="SCREENSHOT">Screenshot</option>
+                        <option value="SCROLL">Scroll</option>
+                        <option value="SELECT">Select</option>
+                    </select>
+                </div>
+                <div class="col-md-8" id="stepFields-${stepCount}">
+                    <input type="text" class="form-control" placeholder="URL (e.g., https://example.com or example.com)" data-field="value" required>
+                </div>
+                <div class="col-md-1">
+                    <button class="btn btn-sm btn-danger" onclick="removeStep(${stepCount})">X</button>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-6">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="captureScreenshot-${stepCount}" data-field="captureScreenshot">
+                        <label class="form-check-label" for="captureScreenshot-${stepCount}">
+                            Capture screenshot after this step
+                        </label>
                     </div>
-                    <div class="col-md-8" id="stepFields-${stepCount}">
-                        <input type="text" class="form-control" placeholder="URL" data-field="value">
-                    </div>
-                    <div class="col-md-1">
-                        <button class="btn btn-sm btn-danger" onclick="removeStep(${stepCount})">X</button>
-                    </div>
+                </div>
+                <div class="col-md-3">
+                    <input type="number" class="form-control form-control-sm" placeholder="Wait after (seconds)" data-field="waitSeconds" min="0" value="0">
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control form-control-sm" placeholder="Screenshot selector (optional)" data-field="captureSelector">
                 </div>
             </div>
         </div>
     `;
-    container.innerHTML += stepHtml;
+
+    container.appendChild(stepDiv);
     stepCount++;
 }
 
 function updateStepFields(stepId) {
-    const stepType = document.querySelector(`#step-${stepId} .step-type`).value;
+    const stepDiv = document.getElementById(`step-${stepId}`);
+    const stepType = stepDiv.querySelector('.step-type').value;
     const fieldsContainer = document.getElementById(`stepFields-${stepId}`);
 
+    // Save existing values
+    const existingValues = {};
+    fieldsContainer.querySelectorAll('[data-field]').forEach(input => {
+        existingValues[input.dataset.field] = input.value;
+    });
+
     let fields = '';
+    let preserveValue = false;
+
     switch(stepType) {
         case 'NAVIGATE':
             fields = '<input type="text" class="form-control" placeholder="URL (e.g., https://example.com or example.com)" data-field="value" required>';
+            preserveValue = existingValues.value;
             break;
         case 'CLICK':
             fields = '<input type="text" class="form-control" placeholder="CSS Selector (e.g., #submit-button, .btn-primary)" data-field="selector" required>';
@@ -289,12 +318,15 @@ function updateStepFields(stepId) {
             break;
         case 'WAIT':
             fields = '<input type="number" class="form-control" placeholder="Seconds to wait" data-field="waitSeconds" min="1" value="1">';
+            preserveValue = existingValues.waitSeconds;
             break;
         case 'SCREENSHOT':
             fields = '<input type="text" class="form-control" placeholder="CSS Selector for specific area (optional, leave empty for full page)" data-field="captureSelector">';
+            preserveValue = existingValues.captureSelector;
             break;
         case 'SCROLL':
             fields = '<input type="number" class="form-control" placeholder="Scroll position in pixels (e.g., 500)" data-field="value" value="0">';
+            preserveValue = existingValues.value;
             break;
         case 'SELECT':
             fields = `
@@ -303,7 +335,16 @@ function updateStepFields(stepId) {
             `;
             break;
     }
+
     fieldsContainer.innerHTML = fields;
+
+    // Restore values where applicable
+    fieldsContainer.querySelectorAll('[data-field]').forEach(input => {
+        const fieldName = input.dataset.field;
+        if (existingValues[fieldName] !== undefined) {
+            input.value = existingValues[fieldName];
+        }
+    });
 }
 
 function removeStep(stepId) {
@@ -355,12 +396,20 @@ document.getElementById('configForm').addEventListener('submit', async (e) => {
         const type = stepDiv.querySelector('.step-type').value;
         const step = {
             order: index,
-            type: type
+            type: type,
+            waitSeconds: 0,
+            captureScreenshot: false
         };
 
-        // Collect all fields
+        // Collect all fields including checkboxes
         stepDiv.querySelectorAll('[data-field]').forEach(input => {
-            step[input.dataset.field] = input.value;
+            if (input.type === 'checkbox') {
+                step[input.dataset.field] = input.checked;
+            } else if (input.type === 'number') {
+                step[input.dataset.field] = parseInt(input.value) || 0;
+            } else {
+                step[input.dataset.field] = input.value;
+            }
         });
 
         // Validate required fields based on step type
@@ -387,6 +436,11 @@ document.getElementById('configForm').addEventListener('submit', async (e) => {
                 }
                 if (!step.value || !step.value.trim()) {
                     error = `Step ${index + 1} (Select): Option value is required`;
+                }
+                break;
+            case 'WAIT':
+                if (!step.waitSeconds || step.waitSeconds <= 0) {
+                    step.waitSeconds = 1; // Default to 1 second
                 }
                 break;
         }

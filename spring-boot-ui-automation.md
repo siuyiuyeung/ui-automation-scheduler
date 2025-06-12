@@ -163,9 +163,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 public class UiAutomationApplication {
-   public static void main(String[] args) {
-      SpringApplication.run(UiAutomationApplication.class, args);
-   }
+    public static void main(String[] args) {
+        SpringApplication.run(UiAutomationApplication.class, args);
+    }
 }
 ```
 
@@ -190,35 +190,35 @@ import java.util.List;
 @EqualsAndHashCode(exclude = {"steps", "schedule", "results"})
 @ToString(exclude = {"results"})
 public class AutomationConfig {
-   @Id
-   @GeneratedValue(strategy = GenerationType.IDENTITY)
-   private Long id;
-
-   @Column(nullable = false)
-   private String name;
-
-   private String description;
-
-   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-   @JoinColumn(name = "config_id")
-   @JsonManagedReference
-   private List<AutomationStep> steps;
-
-   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-   @JoinColumn(name = "schedule_id")
-   private ScheduleConfig schedule;
-
-   @OneToMany(mappedBy = "config", cascade = CascadeType.REMOVE)
-   @JsonIgnore
-   private List<AutomationResult> results;
-
-   private boolean active = true;
-
-   @Column(name = "created_at")
-   private LocalDateTime createdAt = LocalDateTime.now();
-
-   @Column(name = "updated_at")
-   private LocalDateTime updatedAt = LocalDateTime.now();
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(nullable = false)
+    private String name;
+    
+    private String description;
+    
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "config_id")
+    @JsonManagedReference
+    private List<AutomationStep> steps;
+    
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "schedule_id")
+    private ScheduleConfig schedule;
+    
+    @OneToMany(mappedBy = "config", cascade = CascadeType.REMOVE)
+    @JsonIgnore
+    private List<AutomationResult> results;
+    
+    private boolean active = true;
+    
+    @Column(name = "created_at")
+    private LocalDateTime createdAt = LocalDateTime.now();
+    
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt = LocalDateTime.now();
 }
 ```
 
@@ -1457,14 +1457,14 @@ public class SeleniumConfig {
 ```javascript
 // Load configurations
 async function loadConfigs() {
-   const response = await fetch('/api/automation/configs');
-   const configs = await response.json();
-
-   const container = document.getElementById('configsList');
-   container.innerHTML = '';
-
-   configs.forEach(config => {
-      const card = `
+    const response = await fetch('/api/automation/configs');
+    const configs = await response.json();
+    
+    const container = document.getElementById('configsList');
+    container.innerHTML = '';
+    
+    configs.forEach(config => {
+        const card = `
             <div class="col-md-4 mb-3">
                 <div class="card">
                     <div class="card-body">
@@ -1484,24 +1484,24 @@ async function loadConfigs() {
                 </div>
             </div>
         `;
-      container.innerHTML += card;
-   });
+        container.innerHTML += card;
+    });
 }
 
 // Load history
 async function loadHistory() {
-   const response = await fetch('/api/history');
-   const data = await response.json();
-
-   const tbody = document.getElementById('historyTable');
-   tbody.innerHTML = '';
-
-   data.content.forEach(result => {
-      const duration = result.endTime ?
-              Math.round((new Date(result.endTime) - new Date(result.startTime)) / 1000) + 's' :
-              'Running...';
-
-      const row = `
+    const response = await fetch('/api/history');
+    const data = await response.json();
+    
+    const tbody = document.getElementById('historyTable');
+    tbody.innerHTML = '';
+    
+    data.content.forEach(result => {
+        const duration = result.endTime ? 
+            Math.round((new Date(result.endTime) - new Date(result.startTime)) / 1000) + 's' : 
+            'Running...';
+        
+        const row = `
             <tr>
                 <td>${result.configName}</td>
                 <td>
@@ -1516,22 +1516,22 @@ async function loadHistory() {
                 </td>
             </tr>
         `;
-      tbody.innerHTML += row;
-   });
+        tbody.innerHTML += row;
+    });
 }
 
 async function viewDetails(resultId) {
-   try {
-      const response = await fetch(`/api/history/${resultId}`);
-      if (!response.ok) throw new Error('Failed to fetch details');
-
-      const result = await response.json();
-
-      let screenshotsHtml = '';
-      if (result.screenshotPaths && result.screenshotPaths.length > 0) {
-         screenshotsHtml = '<h6>Screenshots:</h6><div class="row">';
-         result.screenshotPaths.forEach((path, index) => {
-            screenshotsHtml += `
+    try {
+        const response = await fetch(`/api/history/${resultId}`);
+        if (!response.ok) throw new Error('Failed to fetch details');
+        
+        const result = await response.json();
+        
+        let screenshotsHtml = '';
+        if (result.screenshotPaths && result.screenshotPaths.length > 0) {
+            screenshotsHtml = '<h6>Screenshots:</h6><div class="row">';
+            result.screenshotPaths.forEach((path, index) => {
+                screenshotsHtml += `
                     <div class="col-md-4 mb-3">
                         <img src="/api/history/${resultId}/screenshot/${index}" 
                              class="img-fluid img-thumbnail" 
@@ -1541,15 +1541,15 @@ async function viewDetails(resultId) {
                         <small class="text-muted d-block mt-1">Screenshot ${index + 1}</small>
                     </div>
                 `;
-         });
-         screenshotsHtml += '</div>';
-      }
-
-      const duration = result.endTime ?
-              Math.round((new Date(result.endTime) - new Date(result.startTime)) / 1000) :
-              'N/A';
-
-      const detailsHtml = `
+            });
+            screenshotsHtml += '</div>';
+        }
+        
+        const duration = result.endTime ? 
+            Math.round((new Date(result.endTime) - new Date(result.startTime)) / 1000) : 
+            'N/A';
+        
+        const detailsHtml = `
             <div class="row mb-4">
                 <div class="col-md-6">
                     <h6>Configuration:</h6>
@@ -1613,310 +1613,364 @@ async function viewDetails(resultId) {
                 </div>
             </div>
         `;
-
-      document.getElementById('detailsContent').innerHTML = detailsHtml;
-      const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
-      modal.show();
-
-   } catch (error) {
-      alert('Failed to load details: ' + error.message);
-   }
+        
+        document.getElementById('detailsContent').innerHTML = detailsHtml;
+        const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
+        modal.show();
+        
+    } catch (error) {
+        alert('Failed to load details: ' + error.message);
+    }
 }
 
 function escapeHtml(text) {
-   const div = document.createElement('div');
-   div.textContent = text;
-   return div.innerHTML;
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // Helper functions
 function getStatusColor(status) {
-   switch(status) {
-      case 'SUCCESS': return 'success';
-      case 'FAILED': return 'danger';
-      case 'RUNNING': return 'primary';
-      default: return 'secondary';
-   }
+    switch(status) {
+        case 'SUCCESS': return 'success';
+        case 'FAILED': return 'danger';
+        case 'RUNNING': return 'primary';
+        default: return 'secondary';
+    }
 }
 
 async function runNow(configId) {
-   const response = await fetch(`/api/automation/configs/${configId}/run`, { method: 'POST' });
-   if (response.ok) {
-      alert('Automation started!');
-      loadHistory();
-   }
+    const response = await fetch(`/api/automation/configs/${configId}/run`, { method: 'POST' });
+    if (response.ok) {
+        alert('Automation started!');
+        loadHistory();
+    }
 }
 
 async function toggleActive(configId) {
-   const response = await fetch(`/api/automation/configs/${configId}/toggle`, { method: 'POST' });
-   if (response.ok) {
-      loadConfigs();
-   }
+    const response = await fetch(`/api/automation/configs/${configId}/toggle`, { method: 'POST' });
+    if (response.ok) {
+        loadConfigs();
+    }
 }
 
 async function deleteConfig(configId) {
-   if (!confirm('Are you sure you want to delete this configuration?')) {
-      return;
-   }
-
-   try {
-      // First try to delete without force
-      let response = await fetch(`/api/automation/configs/${configId}`, { method: 'DELETE' });
-
-      if (response.status === 409) {
-         // Conflict - has results
-         const data = await response.json();
-         const forceDelete = confirm(
-                 `${data.message}\n\n` +
-                 `Do you want to delete the configuration and all ${data.resultCount} execution results?`
-         );
-
-         if (forceDelete) {
-            response = await fetch(`/api/automation/configs/${configId}?force=true`, { method: 'DELETE' });
-         } else {
-            return;
-         }
-      }
-
-      if (response.ok) {
-         const result = await response.json();
-         alert(result.message || 'Configuration deleted successfully');
-         loadConfigs();
-         loadHistory();
-      } else {
-         const error = await response.json();
-         alert('Failed to delete: ' + (error.message || 'Unknown error'));
-      }
-   } catch (error) {
-      alert('Error deleting configuration: ' + error.message);
-   }
+    if (!confirm('Are you sure you want to delete this configuration?')) {
+        return;
+    }
+    
+    try {
+        // First try to delete without force
+        let response = await fetch(`/api/automation/configs/${configId}`, { method: 'DELETE' });
+        
+        if (response.status === 409) {
+            // Conflict - has results
+            const data = await response.json();
+            const forceDelete = confirm(
+                `${data.message}\n\n` +
+                `Do you want to delete the configuration and all ${data.resultCount} execution results?`
+            );
+            
+            if (forceDelete) {
+                response = await fetch(`/api/automation/configs/${configId}?force=true`, { method: 'DELETE' });
+            } else {
+                return;
+            }
+        }
+        
+        if (response.ok) {
+            const result = await response.json();
+            alert(result.message || 'Configuration deleted successfully');
+            loadConfigs();
+            loadHistory();
+        } else {
+            const error = await response.json();
+            alert('Failed to delete: ' + (error.message || 'Unknown error'));
+        }
+    } catch (error) {
+        alert('Error deleting configuration: ' + error.message);
+    }
 }
 
 // Step management
 let stepCount = 0;
 
 function addStep() {
-   const container = document.getElementById('stepsContainer');
-   const stepHtml = `
-        <div class="card mb-2" id="step-${stepCount}">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3">
-                        <select class="form-select step-type" onchange="updateStepFields(${stepCount})">
-                            <option value="NAVIGATE">Navigate</option>
-                            <option value="CLICK">Click</option>
-                            <option value="INPUT">Input</option>
-                            <option value="WAIT">Wait</option>
-                            <option value="SCREENSHOT">Screenshot</option>
-                            <option value="SCROLL">Scroll</option>
-                            <option value="SELECT">Select</option>
-                        </select>
+    const container = document.getElementById('stepsContainer');
+    const stepDiv = document.createElement('div');
+    stepDiv.className = 'card mb-2';
+    stepDiv.id = `step-${stepCount}`;
+    
+    stepDiv.innerHTML = `
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <select class="form-select step-type" onchange="updateStepFields(${stepCount})">
+                        <option value="NAVIGATE">Navigate</option>
+                        <option value="CLICK">Click</option>
+                        <option value="INPUT">Input</option>
+                        <option value="WAIT">Wait</option>
+                        <option value="SCREENSHOT">Screenshot</option>
+                        <option value="SCROLL">Scroll</option>
+                        <option value="SELECT">Select</option>
+                    </select>
+                </div>
+                <div class="col-md-8" id="stepFields-${stepCount}">
+                    <input type="text" class="form-control" placeholder="URL (e.g., https://example.com or example.com)" data-field="value" required>
+                </div>
+                <div class="col-md-1">
+                    <button class="btn btn-sm btn-danger" onclick="removeStep(${stepCount})">X</button>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-6">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="captureScreenshot-${stepCount}" data-field="captureScreenshot">
+                        <label class="form-check-label" for="captureScreenshot-${stepCount}">
+                            Capture screenshot after this step
+                        </label>
                     </div>
-                    <div class="col-md-8" id="stepFields-${stepCount}">
-                        <input type="text" class="form-control" placeholder="URL" data-field="value">
-                    </div>
-                    <div class="col-md-1">
-                        <button class="btn btn-sm btn-danger" onclick="removeStep(${stepCount})">X</button>
-                    </div>
+                </div>
+                <div class="col-md-3">
+                    <input type="number" class="form-control form-control-sm" placeholder="Wait after (seconds)" data-field="waitSeconds" min="0" value="0">
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control form-control-sm" placeholder="Screenshot selector (optional)" data-field="captureSelector">
                 </div>
             </div>
         </div>
     `;
-   container.innerHTML += stepHtml;
-   stepCount++;
+    
+    container.appendChild(stepDiv);
+    stepCount++;
 }
 
 function updateStepFields(stepId) {
-   const stepType = document.querySelector(`#step-${stepId} .step-type`).value;
-   const fieldsContainer = document.getElementById(`stepFields-${stepId}`);
-
-   let fields = '';
-   switch(stepType) {
-      case 'NAVIGATE':
-         fields = '<input type="text" class="form-control" placeholder="URL (e.g., https://example.com or example.com)" data-field="value" required>';
-         break;
-      case 'CLICK':
-         fields = '<input type="text" class="form-control" placeholder="CSS Selector (e.g., #submit-button, .btn-primary)" data-field="selector" required>';
-         break;
-      case 'INPUT':
-         fields = `
+    const stepDiv = document.getElementById(`step-${stepId}`);
+    const stepType = stepDiv.querySelector('.step-type').value;
+    const fieldsContainer = document.getElementById(`stepFields-${stepId}`);
+    
+    // Save existing values
+    const existingValues = {};
+    fieldsContainer.querySelectorAll('[data-field]').forEach(input => {
+        existingValues[input.dataset.field] = input.value;
+    });
+    
+    let fields = '';
+    let preserveValue = false;
+    
+    switch(stepType) {
+        case 'NAVIGATE':
+            fields = '<input type="text" class="form-control" placeholder="URL (e.g., https://example.com or example.com)" data-field="value" required>';
+            preserveValue = existingValues.value;
+            break;
+        case 'CLICK':
+            fields = '<input type="text" class="form-control" placeholder="CSS Selector (e.g., #submit-button, .btn-primary)" data-field="selector" required>';
+            break;
+        case 'INPUT':
+            fields = `
                 <input type="text" class="form-control mb-2" placeholder="CSS Selector (e.g., #username, input[name=\'email\'])" data-field="selector" required>
                 <input type="text" class="form-control" placeholder="Text to input" data-field="value">
             `;
-         break;
-      case 'WAIT':
-         fields = '<input type="number" class="form-control" placeholder="Seconds to wait" data-field="waitSeconds" min="1" value="1">';
-         break;
-      case 'SCREENSHOT':
-         fields = '<input type="text" class="form-control" placeholder="CSS Selector for specific area (optional, leave empty for full page)" data-field="captureSelector">';
-         break;
-      case 'SCROLL':
-         fields = '<input type="number" class="form-control" placeholder="Scroll position in pixels (e.g., 500)" data-field="value" value="0">';
-         break;
-      case 'SELECT':
-         fields = `
+            break;
+        case 'WAIT':
+            fields = '<input type="number" class="form-control" placeholder="Seconds to wait" data-field="waitSeconds" min="1" value="1">';
+            preserveValue = existingValues.waitSeconds;
+            break;
+        case 'SCREENSHOT':
+            fields = '<input type="text" class="form-control" placeholder="CSS Selector for specific area (optional, leave empty for full page)" data-field="captureSelector">';
+            preserveValue = existingValues.captureSelector;
+            break;
+        case 'SCROLL':
+            fields = '<input type="number" class="form-control" placeholder="Scroll position in pixels (e.g., 500)" data-field="value" value="0">';
+            preserveValue = existingValues.value;
+            break;
+        case 'SELECT':
+            fields = `
                 <input type="text" class="form-control mb-2" placeholder="CSS Selector (e.g., #country-select)" data-field="selector" required>
                 <input type="text" class="form-control" placeholder="Option value to select" data-field="value" required>
             `;
-         break;
-   }
-   fieldsContainer.innerHTML = fields;
+            break;
+    }
+    
+    fieldsContainer.innerHTML = fields;
+    
+    // Restore values where applicable
+    fieldsContainer.querySelectorAll('[data-field]').forEach(input => {
+        const fieldName = input.dataset.field;
+        if (existingValues[fieldName] !== undefined) {
+            input.value = existingValues[fieldName];
+        }
+    });
 }
 
 function removeStep(stepId) {
-   document.getElementById(`step-${stepId}`).remove();
+    document.getElementById(`step-${stepId}`).remove();
 }
 
 // Schedule fields
 function updateScheduleFields() {
-   const scheduleType = document.getElementById('scheduleType').value;
-   const container = document.getElementById('scheduleFields');
-
-   let fields = '';
-   switch(scheduleType) {
-      case 'ONCE':
-         fields = '<input type="datetime-local" class="form-control" id="runOnceAt">';
-         break;
-      case 'INTERVAL':
-         fields = '<input type="number" class="form-control" id="intervalMinutes" placeholder="Minutes">';
-         break;
-      case 'CRON':
-         fields = '<input type="text" class="form-control" id="cronExpression" placeholder="0 0 * * * ?">';
-         break;
-   }
-   container.innerHTML = fields;
+    const scheduleType = document.getElementById('scheduleType').value;
+    const container = document.getElementById('scheduleFields');
+    
+    let fields = '';
+    switch(scheduleType) {
+        case 'ONCE':
+            fields = '<input type="datetime-local" class="form-control" id="runOnceAt">';
+            break;
+        case 'INTERVAL':
+            fields = '<input type="number" class="form-control" id="intervalMinutes" placeholder="Minutes">';
+            break;
+        case 'CRON':
+            fields = '<input type="text" class="form-control" id="cronExpression" placeholder="0 0 * * * ?">';
+            break;
+    }
+    container.innerHTML = fields;
 }
 
 // Form submission
 document.getElementById('configForm').addEventListener('submit', async (e) => {
-   e.preventDefault();
-
-   // Validate form
-   const name = document.getElementById('configName').value.trim();
-   if (!name) {
-      alert('Configuration name is required');
-      return;
-   }
-
-   const steps = [];
-   const stepDivs = document.querySelectorAll('[id^="step-"]');
-
-   if (stepDivs.length === 0) {
-      alert('At least one step is required');
-      return;
-   }
-
-   // Validate and collect steps
-   for (let index = 0; index < stepDivs.length; index++) {
-      const stepDiv = stepDivs[index];
-      const type = stepDiv.querySelector('.step-type').value;
-      const step = {
-         order: index,
-         type: type
-      };
-
-      // Collect all fields
-      stepDiv.querySelectorAll('[data-field]').forEach(input => {
-         step[input.dataset.field] = input.value;
-      });
-
-      // Validate required fields based on step type
-      let error = null;
-      switch (type) {
-         case 'NAVIGATE':
-            if (!step.value || !step.value.trim()) {
-               error = `Step ${index + 1} (Navigate): URL is required`;
+    e.preventDefault();
+    
+    // Validate form
+    const name = document.getElementById('configName').value.trim();
+    if (!name) {
+        alert('Configuration name is required');
+        return;
+    }
+    
+    const steps = [];
+    const stepDivs = document.querySelectorAll('[id^="step-"]');
+    
+    if (stepDivs.length === 0) {
+        alert('At least one step is required');
+        return;
+    }
+    
+    // Validate and collect steps
+    for (let index = 0; index < stepDivs.length; index++) {
+        const stepDiv = stepDivs[index];
+        const type = stepDiv.querySelector('.step-type').value;
+        const step = {
+            order: index,
+            type: type,
+            waitSeconds: 0,
+            captureScreenshot: false
+        };
+        
+        // Collect all fields including checkboxes
+        stepDiv.querySelectorAll('[data-field]').forEach(input => {
+            if (input.type === 'checkbox') {
+                step[input.dataset.field] = input.checked;
+            } else if (input.type === 'number') {
+                step[input.dataset.field] = parseInt(input.value) || 0;
+            } else {
+                step[input.dataset.field] = input.value;
             }
-            break;
-         case 'CLICK':
-            if (!step.selector || !step.selector.trim()) {
-               error = `Step ${index + 1} (Click): CSS Selector is required`;
-            }
-            break;
-         case 'INPUT':
-            if (!step.selector || !step.selector.trim()) {
-               error = `Step ${index + 1} (Input): CSS Selector is required`;
-            }
-            break;
-         case 'SELECT':
-            if (!step.selector || !step.selector.trim()) {
-               error = `Step ${index + 1} (Select): CSS Selector is required`;
-            }
-            if (!step.value || !step.value.trim()) {
-               error = `Step ${index + 1} (Select): Option value is required`;
-            }
-            break;
-      }
-
-      if (error) {
-         alert(error);
-         return;
-      }
-
-      steps.push(step);
-   }
-
-   const scheduleType = document.getElementById('scheduleType').value;
-   let schedule = null;
-   if (scheduleType) {
-      schedule = { type: scheduleType };
-      switch(scheduleType) {
-         case 'ONCE':
-            const runOnceAt = document.getElementById('runOnceAt').value;
-            if (!runOnceAt) {
-               alert('Schedule: Run once date/time is required');
-               return;
-            }
-            schedule.runOnceAt = runOnceAt;
-            break;
-         case 'INTERVAL':
-            const intervalMinutes = parseInt(document.getElementById('intervalMinutes').value);
-            if (!intervalMinutes || intervalMinutes <= 0) {
-               alert('Schedule: Interval must be greater than 0');
-               return;
-            }
-            schedule.intervalMinutes = intervalMinutes;
-            break;
-         case 'CRON':
-            const cronExpression = document.getElementById('cronExpression').value;
-            if (!cronExpression || !cronExpression.trim()) {
-               alert('Schedule: Cron expression is required');
-               return;
-            }
-            schedule.cronExpression = cronExpression;
-            break;
-      }
-   }
-
-   const config = {
-      name: name,
-      description: document.getElementById('configDescription').value,
-      steps: steps,
-      schedule: schedule,
-      active: true
-   };
-
-   try {
-      const response = await fetch('/api/automation/configs', {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify(config)
-      });
-
-      if (response.ok) {
-         alert('Configuration created successfully!');
-         document.getElementById('configForm').reset();
-         document.getElementById('stepsContainer').innerHTML = '';
-         document.getElementById('scheduleFields').innerHTML = '';
-         stepCount = 0;
-         loadConfigs();
-      } else {
-         const error = await response.text();
-         alert('Failed to create configuration: ' + error);
-      }
-   } catch (error) {
-      alert('Error creating configuration: ' + error.message);
-   }
+        });
+        
+        // Validate required fields based on step type
+        let error = null;
+        switch (type) {
+            case 'NAVIGATE':
+                if (!step.value || !step.value.trim()) {
+                    error = `Step ${index + 1} (Navigate): URL is required`;
+                }
+                break;
+            case 'CLICK':
+                if (!step.selector || !step.selector.trim()) {
+                    error = `Step ${index + 1} (Click): CSS Selector is required`;
+                }
+                break;
+            case 'INPUT':
+                if (!step.selector || !step.selector.trim()) {
+                    error = `Step ${index + 1} (Input): CSS Selector is required`;
+                }
+                break;
+            case 'SELECT':
+                if (!step.selector || !step.selector.trim()) {
+                    error = `Step ${index + 1} (Select): CSS Selector is required`;
+                }
+                if (!step.value || !step.value.trim()) {
+                    error = `Step ${index + 1} (Select): Option value is required`;
+                }
+                break;
+            case 'WAIT':
+                if (!step.waitSeconds || step.waitSeconds <= 0) {
+                    step.waitSeconds = 1; // Default to 1 second
+                }
+                break;
+        }
+        
+        if (error) {
+            alert(error);
+            return;
+        }
+        
+        steps.push(step);
+    }
+    
+    const scheduleType = document.getElementById('scheduleType').value;
+    let schedule = null;
+    if (scheduleType) {
+        schedule = { type: scheduleType };
+        switch(scheduleType) {
+            case 'ONCE':
+                const runOnceAt = document.getElementById('runOnceAt').value;
+                if (!runOnceAt) {
+                    alert('Schedule: Run once date/time is required');
+                    return;
+                }
+                schedule.runOnceAt = runOnceAt;
+                break;
+            case 'INTERVAL':
+                const intervalMinutes = parseInt(document.getElementById('intervalMinutes').value);
+                if (!intervalMinutes || intervalMinutes <= 0) {
+                    alert('Schedule: Interval must be greater than 0');
+                    return;
+                }
+                schedule.intervalMinutes = intervalMinutes;
+                break;
+            case 'CRON':
+                const cronExpression = document.getElementById('cronExpression').value;
+                if (!cronExpression || !cronExpression.trim()) {
+                    alert('Schedule: Cron expression is required');
+                    return;
+                }
+                schedule.cronExpression = cronExpression;
+                break;
+        }
+    }
+    
+    const config = {
+        name: name,
+        description: document.getElementById('configDescription').value,
+        steps: steps,
+        schedule: schedule,
+        active: true
+    };
+    
+    try {
+        const response = await fetch('/api/automation/configs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(config)
+        });
+        
+        if (response.ok) {
+            alert('Configuration created successfully!');
+            document.getElementById('configForm').reset();
+            document.getElementById('stepsContainer').innerHTML = '';
+            document.getElementById('scheduleFields').innerHTML = '';
+            stepCount = 0;
+            loadConfigs();
+        } else {
+            const error = await response.text();
+            alert('Failed to create configuration: ' + error);
+        }
+    } catch (error) {
+        alert('Error creating configuration: ' + error.message);
+    }
 });
 
 // Initial load
