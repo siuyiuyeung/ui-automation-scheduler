@@ -1402,8 +1402,9 @@ public class SeleniumConfig {
         </div>
 
         <div id="create" class="mb-5">
-            <h2>Create New Configuration</h2>
+            <h2 id="formTitle">Create New Configuration</h2>
             <form id="configForm">
+                <input type="hidden" id="configId" value="">
                 <div class="mb-3">
                     <label for="configName" class="form-label">Name</label>
                     <input type="text" class="form-control" id="configName" required>
@@ -1429,7 +1430,15 @@ public class SeleniumConfig {
                 </div>
                 <div id="scheduleFields"></div>
                 
-                <button type="submit" class="btn btn-primary">Create Configuration</button>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="configActive" checked>
+                    <label class="form-check-label" for="configActive">
+                        Active (Enable scheduling)
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="submitButton">Create Configuration</button>
+                <button type="button" class="btn btn-secondary" onclick="cancelEdit()" style="display: none;" id="cancelButton">Cancel</button>
             </form>
         </div>
     </div>
@@ -1481,6 +1490,8 @@ async function loadConfigs() {
                             </small>
                         </p>
                         <button class="btn btn-sm btn-primary" onclick="runNow(${config.id})">Run Now</button>
+                        <button class="btn btn-sm btn-warning" onclick="editConfig(${config.id})">Edit</button>
+                        <button class="btn btn-sm btn-info" onclick="cloneConfig(${config.id})">Clone</button>
                         <button class="btn btn-sm btn-secondary" onclick="toggleActive(${config.id})">
                             ${config.active ? 'Deactivate' : 'Activate'}
                         </button>
@@ -1727,7 +1738,208 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Helper functions
+// Edit configuration
+async function editConfig(configId) {
+    try {
+        const response = await fetch(`/api/automation/configs/${configId}`);
+        if (!response.ok) throw new Error('Failed to fetch configuration');
+        
+        const config = await response.json();
+        
+        // Set form to edit mode
+        document.getElementById('formTitle').textContent = 'Edit Configuration';
+        document.getElementById('submitButton').textContent = 'Update Configuration';
+        document.getElementById('cancelButton').style.display = 'inline-block';
+        document.getElementById('configId').value = configId;
+        
+        // Fill basic fields
+        document.getElementById('configName').value = config.name;
+        document.getElementById('configDescription').value = config.description || '';
+        document.getElementById('configActive').checked = config.active;
+        
+        // Clear and rebuild steps
+        document.getElementById('stepsContainer').innerHTML = '';
+        stepCount = 0;
+        
+        if (config.steps && config.steps.length > 0) {
+            // Sort steps by order
+            config.steps.sort((a, b) => a.order - b.order);
+            
+            config.steps.forEach(step => {
+                addStepWithData(step);
+            });
+        }
+        
+        // Set schedule
+        if (config.schedule) {
+            document.getElementById('scheduleType').value = config.schedule.type;
+            updateScheduleFields();
+            
+            // Fill schedule fields
+            switch (config.schedule.type) {
+                case 'ONCE':
+                    if (config.schedule.runOnceAt) {
+                        // Convert to datetime-local format
+                        const date = new Date(config.schedule.runOnceAt);
+                        document.getElementById('runOnceAt').value = date.toISOString().slice(0, 16);
+                    }
+                    break;
+                case 'INTERVAL':
+                    document.getElementById('intervalMinutes').value = config.schedule.intervalMinutes || '';
+                    break;
+                case 'CRON':
+                    document.getElementById('cronExpression').value = config.schedule.cronExpression || '';
+                    break;
+            }
+        } else {
+            document.getElementById('scheduleType').value = '';
+            updateScheduleFields();
+        }
+        
+        // Scroll to form
+        document.getElementById('create').scrollIntoView({ behavior: 'smooth' });
+        
+    } catch (error) {
+        alert('Error loading configuration: ' + error.message);
+    }
+}
+
+// Add step with existing data
+function addStepWithData(stepData) {
+    const container = document.getElementById('stepsContainer');
+    const stepDiv = document.createElement('div');
+    stepDiv.className = 'card mb-2';
+    stepDiv.id = `step-${stepCount}`;
+    
+    stepDiv.innerHTML = `
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <select class="form-select step-type" onchange="updateStepFields(${stepCount})">
+                        <option value="NAVIGATE" ${stepData.type === 'NAVIGATE' ? 'selected' : ''}>Navigate</option>
+                        <option value="CLICK" ${stepData.type === 'CLICK' ? 'selected' : ''}>Click</option>
+                        <option value="INPUT" ${stepData.type === 'INPUT' ? 'selected' : ''}>Input</option>
+                        <option value="WAIT" ${stepData.type === 'WAIT' ? 'selected' : ''}>Wait</option>
+                        <option value="SCREENSHOT" ${stepData.type === 'SCREENSHOT' ? 'selected' : ''}>Screenshot</option>
+                        <option value="SCROLL" ${stepData.type === 'SCROLL' ? 'selected' : ''}>Scroll</option>
+                        <option value="SELECT" ${stepData.type === 'SELECT' ? 'selected' : ''}>Select</option>
+                    </select>
+                </div>
+                <div class="col-md-8" id="stepFields-${stepCount}">
+                    <!-- Fields will be populated by updateStepFields -->
+                </div>
+                <div class="col-md-1">
+                    <button class="btn btn-sm btn-danger" onclick="removeStep(${stepCount})">X</button>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-6">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="captureScreenshot-${stepCount}" 
+                               data-field="captureScreenshot" ${stepData.captureScreenshot ? 'checked' : ''}>
+                        <label class="form-check-label" for="captureScreenshot-${stepCount}">
+                            Capture screenshot after this step
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <input type="number" class="form-control form-control-sm" placeholder="Wait after (seconds)" 
+                           data-field="waitSeconds" min="0" value="${stepData.waitSeconds || 0}">
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control form-control-sm" placeholder="Screenshot selector (optional)" 
+                           data-field="captureSelector" value="${stepData.captureSelector || ''}">
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(stepDiv);
+    
+    // Update fields for this step type
+    updateStepFieldsWithData(stepCount, stepData);
+    
+    stepCount++;
+}
+
+// Update step fields with existing data
+function updateStepFieldsWithData(stepId, stepData) {
+    const stepDiv = document.getElementById(`step-${stepId}`);
+    const stepType = stepData.type;
+    const fieldsContainer = document.getElementById(`stepFields-${stepId}`);
+    
+    let fields = '';
+    switch(stepType) {
+        case 'NAVIGATE':
+            fields = `<input type="text" class="form-control" placeholder="URL (e.g., https://example.com or example.com)" 
+                           data-field="value" value="${stepData.value || ''}" required>`;
+            break;
+        case 'CLICK':
+            fields = `<input type="text" class="form-control" placeholder="CSS Selector (e.g., #submit-button, .btn-primary)" 
+                           data-field="selector" value="${stepData.selector || ''}" required>`;
+            break;
+        case 'INPUT':
+            fields = `
+                <input type="text" class="form-control mb-2" placeholder="CSS Selector (e.g., #username, input[name='email'])" 
+                       data-field="selector" value="${stepData.selector || ''}" required>
+                <input type="text" class="form-control" placeholder="Text to input" 
+                       data-field="value" value="${stepData.value || ''}">
+            `;
+            break;
+        case 'WAIT':
+            fields = `<input type="number" class="form-control" placeholder="Seconds to wait" 
+                           data-field="waitSeconds" min="1" value="${stepData.waitSeconds || 1}">`;
+            break;
+        case 'SCREENSHOT':
+            fields = `<input type="text" class="form-control" placeholder="CSS Selector for specific area (optional, leave empty for full page)" 
+                           data-field="captureSelector" value="${stepData.captureSelector || ''}">`;
+            break;
+        case 'SCROLL':
+            fields = `<input type="number" class="form-control" placeholder="Scroll position in pixels (e.g., 500)" 
+                           data-field="value" value="${stepData.value || 0}">`;
+            break;
+        case 'SELECT':
+            fields = `
+                <input type="text" class="form-control mb-2" placeholder="CSS Selector (e.g., #country-select)" 
+                       data-field="selector" value="${stepData.selector || ''}" required>
+                <input type="text" class="form-control" placeholder="Option value to select" 
+                       data-field="value" value="${stepData.value || ''}" required>
+            `;
+            break;
+    }
+    fieldsContainer.innerHTML = fields;
+}
+
+// Track form changes
+let formChanged = false;
+
+// Mark form as changed when inputs are modified
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('configForm');
+    form.addEventListener('input', () => {
+        formChanged = true;
+    });
+    form.addEventListener('change', () => {
+        formChanged = true;
+    });
+});
+
+// Cancel edit mode
+function cancelEdit() {
+    if (formChanged && !confirm('You have unsaved changes. Are you sure you want to cancel?')) {
+        return;
+    }
+    
+    document.getElementById('formTitle').textContent = 'Create New Configuration';
+    document.getElementById('submitButton').textContent = 'Create Configuration';
+    document.getElementById('cancelButton').style.display = 'none';
+    document.getElementById('configId').value = '';
+    document.getElementById('configForm').reset();
+    document.getElementById('stepsContainer').innerHTML = '';
+    document.getElementById('scheduleFields').innerHTML = '';
+    stepCount = 0;
+    formChanged = false;
+}
 function getStatusColor(status) {
     switch(status) {
         case 'SUCCESS': return 'success';
@@ -1930,6 +2142,10 @@ function updateScheduleFields() {
 document.getElementById('configForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
+    // Check if we're in edit mode
+    const configId = document.getElementById('configId').value;
+    const isEdit = configId && configId.trim() !== '';
+    
     // Validate form
     const name = document.getElementById('configName').value.trim();
     if (!name) {
@@ -2019,7 +2235,7 @@ document.getElementById('configForm').addEventListener('submit', async (e) => {
                     alert('Schedule: Run once date/time is required');
                     return;
                 }
-                schedule.runOnceAt = runOnceAt;
+                schedule.runOnceAt = new Date(runOnceAt).toISOString();
                 break;
             case 'INTERVAL':
                 const intervalMinutes = parseInt(document.getElementById('intervalMinutes').value);
@@ -2045,29 +2261,30 @@ document.getElementById('configForm').addEventListener('submit', async (e) => {
         description: document.getElementById('configDescription').value,
         steps: steps,
         schedule: schedule,
-        active: true
+        active: document.getElementById('configActive').checked
     };
     
     try {
-        const response = await fetch('/api/automation/configs', {
-            method: 'POST',
+        const url = isEdit ? `/api/automation/configs/${configId}` : '/api/automation/configs';
+        const method = isEdit ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+            method: method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(config)
         });
         
         if (response.ok) {
-            alert('Configuration created successfully!');
-            document.getElementById('configForm').reset();
-            document.getElementById('stepsContainer').innerHTML = '';
-            document.getElementById('scheduleFields').innerHTML = '';
-            stepCount = 0;
+            alert(`Configuration ${isEdit ? 'updated' : 'created'} successfully!`);
+            formChanged = false; // Reset change tracking
+            cancelEdit(); // Reset form
             loadConfigs();
         } else {
             const error = await response.text();
-            alert('Failed to create configuration: ' + error);
+            alert(`Failed to ${isEdit ? 'update' : 'create'} configuration: ${error}`);
         }
     } catch (error) {
-        alert('Error creating configuration: ' + error.message);
+        alert(`Error ${isEdit ? 'updating' : 'creating'} configuration: ${error.message}`);
     }
 });
 
@@ -2082,59 +2299,148 @@ setInterval(loadHistory, 10000);
 ### static/css/style.css
 ```css
 body {
-   background-color: #f8f9fa;
+    background-color: #f8f9fa;
 }
 
 .card {
-   box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-   transition: transform 0.2s;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: transform 0.2s;
 }
 
 .card:hover {
-   transform: translateY(-5px);
+    transform: translateY(-5px);
 }
 
 .navbar-brand {
-   font-weight: bold;
+    font-weight: bold;
 }
 
 #stepsContainer .card {
-   background-color: #f1f3f5;
+    background-color: #f1f3f5;
 }
 
 .table {
-   background-color: white;
+    background-color: white;
 }
 
 .badge {
-   padding: 0.5em 1em;
+    padding: 0.5em 1em;
+}
+
+/* Button spacing */
+.card-body .btn {
+    margin: 2px;
+}
+
+/* Make configuration cards more compact */
+.card-body {
+    padding: 1rem;
 }
 
 /* Modal styles */
 .modal-xl {
-   max-width: 90%;
+    max-width: 90%;
 }
 
 .img-thumbnail {
-   transition: transform 0.2s;
+    transition: transform 0.2s;
 }
 
 .img-thumbnail:hover {
-   transform: scale(1.05);
+    transform: scale(1.05);
 }
 
 pre {
-   white-space: pre-wrap;
-   word-wrap: break-word;
-   font-size: 0.875rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 0.875rem;
 }
 
 code {
-   font-size: 0.875rem;
-   color: #d63384;
-   background-color: #f8f9fa;
-   padding: 2px 4px;
-   border-radius: 3px;
+    font-size: 0.875rem;
+    color: #d63384;
+    background-color: #f8f9fa;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+/* Status badge colors */
+.bg-success { background-color: #28a745 !important; }
+.bg-danger { background-color: #dc3545 !important; }
+.bg-primary { background-color: #007bff !important; }
+.bg-secondary { background-color: #6c757d !important; }
+.bg-warning { background-color: #ffc107 !important; }
+.bg-info { background-color: #17a2b8 !important; }
+
+/* Form improvements */
+#create {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+/* Step counter */
+.step-number {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background: #007bff;
+    color: white;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: bold;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+#stepsContainer .card {
+    background-color: #f1f3f5;
+}
+
+.table {
+    background-color: white;
+}
+
+.badge {
+    padding: 0.5em 1em;
+}
+
+/* Modal styles */
+.modal-xl {
+    max-width: 90%;
+}
+
+.img-thumbnail {
+    transition: transform 0.2s;
+}
+
+.img-thumbnail:hover {
+    transform: scale(1.05);
+}
+
+pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 0.875rem;
+}
+
+code {
+    font-size: 0.875rem;
+    color: #d63384;
+    background-color: #f8f9fa;
+    padding: 2px 4px;
+    border-radius: 3px;
 }
 
 /* Status badge colors */

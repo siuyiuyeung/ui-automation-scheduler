@@ -44,8 +44,9 @@
     </div>
 
     <div id="create" class="mb-5">
-        <h2>Create New Configuration</h2>
+        <h2 id="formTitle">Create New Configuration</h2>
         <form id="configForm">
+            <input type="hidden" id="configId" value="">
             <div class="mb-3">
                 <label for="configName" class="form-label">Name</label>
                 <input type="text" class="form-control" id="configName" required>
@@ -71,7 +72,15 @@
             </div>
             <div id="scheduleFields"></div>
 
-            <button type="submit" class="btn btn-primary">Create Configuration</button>
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="configActive" checked>
+                <label class="form-check-label" for="configActive">
+                    Active (Enable scheduling)
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="submitButton">Create Configuration</button>
+            <button type="button" class="btn btn-secondary" onclick="cancelEdit()" style="display: none;" id="cancelButton">Cancel</button>
         </form>
     </div>
 </div>

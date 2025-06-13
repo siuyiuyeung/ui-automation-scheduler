@@ -27,6 +27,95 @@ body {
     padding: 0.5em 1em;
 }
 
+/* Button spacing */
+.card-body .btn {
+    margin: 2px;
+}
+
+/* Make configuration cards more compact */
+.card-body {
+    padding: 1rem;
+}
+
+/* Modal styles */
+.modal-xl {
+    max-width: 90%;
+}
+
+.img-thumbnail {
+    transition: transform 0.2s;
+}
+
+.img-thumbnail:hover {
+    transform: scale(1.05);
+}
+
+pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 0.875rem;
+}
+
+code {
+    font-size: 0.875rem;
+    color: #d63384;
+    background-color: #f8f9fa;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+/* Status badge colors */
+.bg-success { background-color: #28a745 !important; }
+.bg-danger { background-color: #dc3545 !important; }
+.bg-primary { background-color: #007bff !important; }
+.bg-secondary { background-color: #6c757d !important; }
+.bg-warning { background-color: #ffc107 !important; }
+.bg-info { background-color: #17a2b8 !important; }
+
+/* Form improvements */
+#create {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+/* Step counter */
+.step-number {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background: #007bff;
+    color: white;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: bold;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+#stepsContainer .card {
+    background-color: #f1f3f5;
+}
+
+.table {
+    background-color: white;
+}
+
+.badge {
+    padding: 0.5em 1em;
+}
+
 /* Modal styles */
 .modal-xl {
     max-width: 90%;
