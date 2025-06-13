@@ -1,6 +1,9 @@
 package com.automation.service;
 
 import com.automation.model.AutomationConfig;
+import com.automation.model.AutomationStep;
+import com.automation.model.ScheduleConfig;
+import com.automation.dto.AutomationConfigDTO;
 import com.automation.repository.AutomationConfigRepository;
 import com.automation.repository.AutomationResultRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -21,6 +26,75 @@ public class ConfigurationService {
     private final AutomationConfigRepository configRepository;
     private final AutomationResultRepository resultRepository;
     private final SchedulerService schedulerService;
+
+    @Transactional
+    public AutomationConfig updateConfiguration(Long configId, AutomationConfigDTO dto) {
+        AutomationConfig config = configRepository.findById(configId)
+                .orElseThrow(() -> new IllegalArgumentException("Configuration not found"));
+
+        // Update basic fields
+        config.setName(dto.getName());
+        config.setDescription(dto.getDescription());
+        config.setActive(dto.isActive());
+        config.setUpdatedAt(LocalDateTime.now());
+
+        // Update steps - clear and re-add to avoid orphan removal issue
+        updateSteps(config, dto.getSteps());
+
+        // Update schedule
+        updateSchedule(config, dto.getSchedule());
+
+        // Save configuration
+        AutomationConfig saved = configRepository.save(config);
+
+        // Reschedule if needed
+        schedulerService.rescheduleAutomation(saved);
+
+        return saved;
+    }
+
+    private void updateSteps(AutomationConfig config, List<AutomationStep> newSteps) {
+        // Clear existing steps
+        if (config.getSteps() == null) {
+            config.setSteps(new ArrayList<>());
+        } else {
+            config.getSteps().clear();
+        }
+
+        // Add new steps
+        if (newSteps != null) {
+            for (int i = 0; i < newSteps.size(); i++) {
+                AutomationStep step = new AutomationStep();
+                AutomationStep source = newSteps.get(i);
+
+                // Copy fields from DTO
+                step.setOrder(i);
+                step.setType(source.getType());
+                step.setSelector(source.getSelector());
+                step.setValue(source.getValue());
+                step.setWaitSeconds(source.getWaitSeconds());
+                step.setCaptureScreenshot(source.isCaptureScreenshot());
+                step.setCaptureSelector(source.getCaptureSelector());
+                step.setConfig(config);
+
+                config.getSteps().add(step);
+            }
+        }
+    }
+
+    private void updateSchedule(AutomationConfig config, ScheduleConfig newSchedule) {
+        if (newSchedule != null) {
+            if (config.getSchedule() == null) {
+                config.setSchedule(new ScheduleConfig());
+            }
+            config.getSchedule().setType(newSchedule.getType());
+            config.getSchedule().setCronExpression(newSchedule.getCronExpression());
+            config.getSchedule().setIntervalMinutes(newSchedule.getIntervalMinutes());
+            config.getSchedule().setRunOnceAt(newSchedule.getRunOnceAt());
+        } else {
+            config.setSchedule(null);
+        }
+    }
 
     @Transactional
     public void deleteConfiguration(Long configId, boolean force) {

@@ -52,102 +52,102 @@ ui-automation-scheduler/
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
-   <modelVersion>4.0.0</modelVersion>
-
-   <parent>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-parent</artifactId>
-      <version>3.3.0</version>
-      <relativePath/>
-   </parent>
-
-   <groupId>com.automation</groupId>
-   <artifactId>ui-automation-scheduler</artifactId>
-   <version>1.0.0</version>
-   <name>UI Automation Scheduler</name>
-
-   <properties>
-      <java.version>24</java.version>
-      <selenium.version>4.20.0</selenium.version>
-   </properties>
-
-   <dependencies>
-      <!-- Spring Boot Starters -->
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-web</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-data-jpa</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-thymeleaf</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-validation</artifactId>
-      </dependency>
-
-      <!-- No Quartz dependency needed, using Spring's built-in scheduling -->
-
-      <!-- Database -->
-      <dependency>
-         <groupId>com.h2database</groupId>
-         <artifactId>h2</artifactId>
-         <scope>runtime</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.postgresql</groupId>
-         <artifactId>postgresql</artifactId>
-         <scope>runtime</scope>
-      </dependency>
-
-      <!-- Selenium -->
-      <dependency>
-         <groupId>org.seleniumhq.selenium</groupId>
-         <artifactId>selenium-java</artifactId>
-         <version>${selenium.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.seleniumhq.selenium</groupId>
-         <artifactId>selenium-devtools-v129</artifactId>
-         <version>${selenium.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>io.github.bonigarcia</groupId>
-         <artifactId>webdrivermanager</artifactId>
-         <version>5.8.0</version>
-      </dependency>
-
-      <!-- Utilities -->
-      <dependency>
-         <groupId>org.projectlombok</groupId>
-         <artifactId>lombok</artifactId>
-         <optional>true</optional>
-      </dependency>
-      <dependency>
-         <groupId>com.fasterxml.jackson.datatype</groupId>
-         <artifactId>jackson-datatype-jsr310</artifactId>
-      </dependency>
-
-      <!-- Test -->
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-test</artifactId>
-         <scope>test</scope>
-      </dependency>
-   </dependencies>
-
-   <build>
-      <plugins>
-         <plugin>
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.0</version>
+        <relativePath/>
+    </parent>
+    
+    <groupId>com.automation</groupId>
+    <artifactId>ui-automation-scheduler</artifactId>
+    <version>1.0.0</version>
+    <name>UI Automation Scheduler</name>
+    
+    <properties>
+        <java.version>24</java.version>
+        <selenium.version>4.20.0</selenium.version>
+    </properties>
+    
+    <dependencies>
+        <!-- Spring Boot Starters -->
+        <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-maven-plugin</artifactId>
-         </plugin>
-      </plugins>
-   </build>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        
+        <!-- No Quartz dependency needed, using Spring's built-in scheduling -->
+        
+        <!-- Database -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        
+        <!-- Selenium -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>${selenium.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-devtools-v129</artifactId>
+            <version>${selenium.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.bonigarcia</groupId>
+            <artifactId>webdrivermanager</artifactId>
+            <version>5.8.0</version>
+        </dependency>
+        
+        <!-- Utilities -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+        
+        <!-- Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>
 ```
 
@@ -229,12 +229,14 @@ package com.automation.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Data
 @Table(name = "automation_steps")
 @EqualsAndHashCode(exclude = {"config"})
+@ToString(exclude = {"config"})
 public class AutomationStep {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -262,7 +264,7 @@ public class AutomationStep {
     @Column(name = "capture_selector")
     private String captureSelector; // Specific area to capture
     
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "config_id")
     @JsonBackReference
     private AutomationConfig config;
@@ -839,6 +841,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/automation")
 @RequiredArgsConstructor
+@Slf4j
 public class AutomationController {
     
     private final AutomationConfigRepository configRepository;
@@ -886,22 +889,15 @@ public class AutomationController {
         // Validate configuration
         validateConfiguration(dto);
         
-        return configRepository.findById(id)
-            .map(config -> {
-                config.setName(dto.getName());
-                config.setDescription(dto.getDescription());
-                config.setSteps(dto.getSteps());
-                config.setSchedule(dto.getSchedule());
-                config.setActive(dto.isActive());
-                
-                AutomationConfig saved = configRepository.save(config);
-                
-                // Reschedule if needed
-                schedulerService.rescheduleAutomation(saved);
-                
-                return ResponseEntity.ok(saved);
-            })
-            .orElse(ResponseEntity.notFound().build());
+        try {
+            AutomationConfig updated = configurationService.updateConfiguration(id, dto);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            log.error("Error updating configuration", e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
     
     private void validateConfiguration(AutomationConfigDTO dto) {

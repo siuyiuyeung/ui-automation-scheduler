@@ -10,6 +10,7 @@ import com.automation.service.AutomationService;
 import com.automation.service.ConfigurationService;
 import com.automation.service.SchedulerService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/automation")
 @RequiredArgsConstructor
+@Slf4j
 public class AutomationController {
 
     private final AutomationConfigRepository configRepository;
@@ -67,22 +69,15 @@ public class AutomationController {
         // Validate configuration
         validateConfiguration(dto);
 
-        return configRepository.findById(id)
-                .map(config -> {
-                    config.setName(dto.getName());
-                    config.setDescription(dto.getDescription());
-                    config.setSteps(dto.getSteps());
-                    config.setSchedule(dto.getSchedule());
-                    config.setActive(dto.isActive());
-
-                    AutomationConfig saved = configRepository.save(config);
-
-                    // Reschedule if needed
-                    schedulerService.rescheduleAutomation(saved);
-
-                    return ResponseEntity.ok(saved);
-                })
-                .orElse(ResponseEntity.notFound().build());
+        try {
+            AutomationConfig updated = configurationService.updateConfiguration(id, dto);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            log.error("Error updating configuration", e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     private void validateConfiguration(AutomationConfigDTO dto) {
