@@ -416,8 +416,8 @@ function updateStepFieldsWithData(stepId, stepData) {
             `;
             break;
         case 'WAIT':
-            fields = `<input type="number" class="form-control" placeholder="Seconds to wait" 
-                           data-field="waitSeconds" min="1" value="${stepData.waitSeconds || 1}">`;
+            // For WAIT step, we don't need additional fields - the wait time is in the common area
+            fields = '<div class="alert alert-info mb-0"><i class="bi bi-info-circle"></i> For WAIT steps, use the "Wait after step" field below to set the duration.</div>';
             break;
         case 'SCREENSHOT':
             fields = `<input type="text" class="form-control" placeholder="CSS Selector for specific area (optional, leave empty for full page)" 
@@ -571,6 +571,7 @@ function addStep() {
                     </div>
                 </div>
                 <div class="col-md-3">
+                    <label class="form-label text-muted small">Wait after step:</label>
                     <input type="number" class="form-control form-control-sm" placeholder="Wait after (seconds)" data-field="waitSeconds" min="0" value="0">
                 </div>
                 <div class="col-md-3">
@@ -613,8 +614,8 @@ function updateStepFields(stepId) {
             `;
             break;
         case 'WAIT':
-            fields = '<input type="number" class="form-control" placeholder="Seconds to wait" data-field="waitSeconds" min="1" value="1">';
-            preserveValue = existingValues.waitSeconds;
+            // For WAIT step, we don't need additional fields - the wait time is in the common area
+            fields = '<div class="alert alert-info mb-0">Configure wait time in seconds below</div>';
             break;
         case 'SCREENSHOT':
             fields = '<input type="text" class="form-control" placeholder="CSS Selector for specific area (optional, leave empty for full page)" data-field="captureSelector">';
@@ -739,8 +740,9 @@ document.getElementById('configForm').addEventListener('submit', async (e) => {
                 }
                 break;
             case 'WAIT':
+                // For WAIT step, ensure waitSeconds has a valid value
                 if (!step.waitSeconds || step.waitSeconds <= 0) {
-                    step.waitSeconds = 1; // Default to 1 second
+                    error = `Step ${index + 1} (Wait): Wait time must be greater than 0`;
                 }
                 break;
         }

@@ -52,102 +52,102 @@ ui-automation-scheduler/
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.0</version>
-        <relativePath/>
-    </parent>
-    
-    <groupId>com.automation</groupId>
-    <artifactId>ui-automation-scheduler</artifactId>
-    <version>1.0.0</version>
-    <name>UI Automation Scheduler</name>
-    
-    <properties>
-        <java.version>24</java.version>
-        <selenium.version>4.20.0</selenium.version>
-    </properties>
-    
-    <dependencies>
-        <!-- Spring Boot Starters -->
-        <dependency>
+   <modelVersion>4.0.0</modelVersion>
+
+   <parent>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-parent</artifactId>
+      <version>3.3.0</version>
+      <relativePath/>
+   </parent>
+
+   <groupId>com.automation</groupId>
+   <artifactId>ui-automation-scheduler</artifactId>
+   <version>1.0.0</version>
+   <name>UI Automation Scheduler</name>
+
+   <properties>
+      <java.version>24</java.version>
+      <selenium.version>4.20.0</selenium.version>
+   </properties>
+
+   <dependencies>
+      <!-- Spring Boot Starters -->
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-web</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-data-jpa</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-thymeleaf</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-validation</artifactId>
+      </dependency>
+
+      <!-- No Quartz dependency needed, using Spring's built-in scheduling -->
+
+      <!-- Database -->
+      <dependency>
+         <groupId>com.h2database</groupId>
+         <artifactId>h2</artifactId>
+         <scope>runtime</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.postgresql</groupId>
+         <artifactId>postgresql</artifactId>
+         <scope>runtime</scope>
+      </dependency>
+
+      <!-- Selenium -->
+      <dependency>
+         <groupId>org.seleniumhq.selenium</groupId>
+         <artifactId>selenium-java</artifactId>
+         <version>${selenium.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.seleniumhq.selenium</groupId>
+         <artifactId>selenium-devtools-v129</artifactId>
+         <version>${selenium.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>io.github.bonigarcia</groupId>
+         <artifactId>webdrivermanager</artifactId>
+         <version>5.8.0</version>
+      </dependency>
+
+      <!-- Utilities -->
+      <dependency>
+         <groupId>org.projectlombok</groupId>
+         <artifactId>lombok</artifactId>
+         <optional>true</optional>
+      </dependency>
+      <dependency>
+         <groupId>com.fasterxml.jackson.datatype</groupId>
+         <artifactId>jackson-datatype-jsr310</artifactId>
+      </dependency>
+
+      <!-- Test -->
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-test</artifactId>
+         <scope>test</scope>
+      </dependency>
+   </dependencies>
+
+   <build>
+      <plugins>
+         <plugin>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-validation</artifactId>
-        </dependency>
-        
-        <!-- No Quartz dependency needed, using Spring's built-in scheduling -->
-        
-        <!-- Database -->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        
-        <!-- Selenium -->
-        <dependency>
-            <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-java</artifactId>
-            <version>${selenium.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-devtools-v129</artifactId>
-            <version>${selenium.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.bonigarcia</groupId>
-            <artifactId>webdrivermanager</artifactId>
-            <version>5.8.0</version>
-        </dependency>
-        
-        <!-- Utilities -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-        </dependency>
-        
-        <!-- Test -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-    
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+         </plugin>
+      </plugins>
+   </build>
 </project>
 ```
 
@@ -623,7 +623,10 @@ public class AutomationService {
                 break;
                 
             case WAIT:
-                int waitTime = step.getWaitSeconds() > 0 ? step.getWaitSeconds() : 1;
+                int waitTime = step.getWaitSeconds();
+                if (waitTime <= 0) {
+                    waitTime = 1; // Default to 1 second minimum
+                }
                 Thread.sleep(waitTime * 1000L);
                 logs.append("Waited for: ").append(waitTime).append(" seconds\n");
                 break;
@@ -1883,8 +1886,8 @@ function updateStepFieldsWithData(stepId, stepData) {
             `;
             break;
         case 'WAIT':
-            fields = `<input type="number" class="form-control" placeholder="Seconds to wait" 
-                           data-field="waitSeconds" min="1" value="${stepData.waitSeconds || 1}">`;
+            // For WAIT step, we don't need additional fields - the wait time is in the common area
+            fields = '<div class="alert alert-info mb-0"><i class="bi bi-info-circle"></i> For WAIT steps, use the "Wait after step" field below to set the duration.</div>';
             break;
         case 'SCREENSHOT':
             fields = `<input type="text" class="form-control" placeholder="CSS Selector for specific area (optional, leave empty for full page)" 
@@ -2038,6 +2041,7 @@ function addStep() {
                     </div>
                 </div>
                 <div class="col-md-3">
+                    <label class="form-label text-muted small">Wait after step:</label>
                     <input type="number" class="form-control form-control-sm" placeholder="Wait after (seconds)" data-field="waitSeconds" min="0" value="0">
                 </div>
                 <div class="col-md-3">
@@ -2080,8 +2084,8 @@ function updateStepFields(stepId) {
             `;
             break;
         case 'WAIT':
-            fields = '<input type="number" class="form-control" placeholder="Seconds to wait" data-field="waitSeconds" min="1" value="1">';
-            preserveValue = existingValues.waitSeconds;
+            // For WAIT step, we don't need additional fields - the wait time is in the common area
+            fields = '<div class="alert alert-info mb-0">Configure wait time in seconds below</div>';
             break;
         case 'SCREENSHOT':
             fields = '<input type="text" class="form-control" placeholder="CSS Selector for specific area (optional, leave empty for full page)" data-field="captureSelector">';
@@ -2206,8 +2210,9 @@ document.getElementById('configForm').addEventListener('submit', async (e) => {
                 }
                 break;
             case 'WAIT':
+                // For WAIT step, ensure waitSeconds has a valid value
                 if (!step.waitSeconds || step.waitSeconds <= 0) {
-                    step.waitSeconds = 1; // Default to 1 second
+                    error = `Step ${index + 1} (Wait): Wait time must be greater than 0`;
                 }
                 break;
         }
@@ -2295,69 +2300,69 @@ setInterval(loadHistory, 10000);
 ### static/css/style.css
 ```css
 body {
-    background-color: #f8f9fa;
+   background-color: #f8f9fa;
 }
 
 .card {
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    transition: transform 0.2s;
+   box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+   transition: transform 0.2s;
 }
 
 .card:hover {
-    transform: translateY(-5px);
+   transform: translateY(-5px);
 }
 
 .navbar-brand {
-    font-weight: bold;
+   font-weight: bold;
 }
 
 #stepsContainer .card {
-    background-color: #f1f3f5;
+   background-color: #f1f3f5;
 }
 
 .table {
-    background-color: white;
+   background-color: white;
 }
 
 .badge {
-    padding: 0.5em 1em;
+   padding: 0.5em 1em;
 }
 
 /* Button spacing */
 .card-body .btn {
-    margin: 2px;
+   margin: 2px;
 }
 
 /* Make configuration cards more compact */
 .card-body {
-    padding: 1rem;
+   padding: 1rem;
 }
 
 /* Modal styles */
 .modal-xl {
-    max-width: 90%;
+   max-width: 90%;
 }
 
 .img-thumbnail {
-    transition: transform 0.2s;
+   transition: transform 0.2s;
 }
 
 .img-thumbnail:hover {
-    transform: scale(1.05);
+   transform: scale(1.05);
 }
 
 pre {
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    font-size: 0.875rem;
+   white-space: pre-wrap;
+   word-wrap: break-word;
+   font-size: 0.875rem;
 }
 
 code {
-    font-size: 0.875rem;
-    color: #d63384;
-    background-color: #f8f9fa;
-    padding: 2px 4px;
-    border-radius: 3px;
+   font-size: 0.875rem;
+   color: #d63384;
+   background-color: #f8f9fa;
+   padding: 2px 4px;
+   border-radius: 3px;
 }
 
 /* Status badge colors */
@@ -2370,73 +2375,73 @@ code {
 
 /* Form improvements */
 #create {
-    background-color: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
+   background-color: #f8f9fa;
+   padding: 20px;
+   border-radius: 8px;
 }
 
 /* Step counter */
 .step-number {
-    position: absolute;
-    top: 5px;
-    left: 5px;
-    background: #007bff;
-    color: white;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.875rem;
-    font-weight: bold;
+   position: absolute;
+   top: 5px;
+   left: 5px;
+   background: #007bff;
+   color: white;
+   width: 25px;
+   height: 25px;
+   border-radius: 50%;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   font-size: 0.875rem;
+   font-weight: bold;
 }
 
 .card:hover {
-    transform: translateY(-5px);
+   transform: translateY(-5px);
 }
 
 .navbar-brand {
-    font-weight: bold;
+   font-weight: bold;
 }
 
 #stepsContainer .card {
-    background-color: #f1f3f5;
+   background-color: #f1f3f5;
 }
 
 .table {
-    background-color: white;
+   background-color: white;
 }
 
 .badge {
-    padding: 0.5em 1em;
+   padding: 0.5em 1em;
 }
 
 /* Modal styles */
 .modal-xl {
-    max-width: 90%;
+   max-width: 90%;
 }
 
 .img-thumbnail {
-    transition: transform 0.2s;
+   transition: transform 0.2s;
 }
 
 .img-thumbnail:hover {
-    transform: scale(1.05);
+   transform: scale(1.05);
 }
 
 pre {
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    font-size: 0.875rem;
+   white-space: pre-wrap;
+   word-wrap: break-word;
+   font-size: 0.875rem;
 }
 
 code {
-    font-size: 0.875rem;
-    color: #d63384;
-    background-color: #f8f9fa;
-    padding: 2px 4px;
-    border-radius: 3px;
+   font-size: 0.875rem;
+   color: #d63384;
+   background-color: #f8f9fa;
+   padding: 2px 4px;
+   border-radius: 3px;
 }
 
 /* Status badge colors */

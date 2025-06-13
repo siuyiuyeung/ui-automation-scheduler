@@ -64,19 +64,39 @@ public class AutomationService {
                              AutomationResult result, StringBuilder logs) throws Exception {
         logs.append("Executing step: ").append(step.getType()).append("\n");
 
+        // Validate step data
+        validateStep(step);
+
         switch (step.getType()) {
             case NAVIGATE:
-                driver.get(step.getValue());
-                logs.append("Navigated to: ").append(step.getValue()).append("\n");
+                String url = step.getValue();
+                if (url == null || url.trim().isEmpty()) {
+                    throw new IllegalArgumentException("Navigate step requires a valid URL");
+                }
+                // Add protocol if missing
+                if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                    url = "https://" + url;
+                }
+                driver.get(url);
+                logs.append("Navigated to: ").append(url).append("\n");
                 break;
 
             case CLICK:
+                if (step.getSelector() == null || step.getSelector().trim().isEmpty()) {
+                    throw new IllegalArgumentException("Click step requires a selector");
+                }
                 WebElement clickElement = driver.findElement(By.cssSelector(step.getSelector()));
                 clickElement.click();
                 logs.append("Clicked element: ").append(step.getSelector()).append("\n");
                 break;
 
             case INPUT:
+                if (step.getSelector() == null || step.getSelector().trim().isEmpty()) {
+                    throw new IllegalArgumentException("Input step requires a selector");
+                }
+                if (step.getValue() == null) {
+                    step.setValue(""); // Allow empty input
+                }
                 WebElement inputElement = driver.findElement(By.cssSelector(step.getSelector()));
                 inputElement.clear();
                 inputElement.sendKeys(step.getValue());
@@ -84,8 +104,12 @@ public class AutomationService {
                 break;
 
             case WAIT:
-                Thread.sleep(step.getWaitSeconds() * 1000L);
-                logs.append("Waited for: ").append(step.getWaitSeconds()).append(" seconds\n");
+                int waitTime = step.getWaitSeconds();
+                if (waitTime <= 0) {
+                    waitTime = 1; // Default to 1 second minimum
+                }
+                Thread.sleep(waitTime * 1000L);
+                logs.append("Waited for: ").append(waitTime).append(" seconds\n");
                 break;
 
             case SCREENSHOT:
@@ -95,25 +119,38 @@ public class AutomationService {
                 break;
 
             case SCROLL:
-                ((JavascriptExecutor) driver).executeScript("window.scrollTo(0, " + step.getValue() + ")");
-                logs.append("Scrolled to position: ").append(step.getValue()).append("\n");
+                String scrollValue = step.getValue() != null ? step.getValue() : "0";
+                ((JavascriptExecutor) driver).executeScript("window.scrollTo(0, " + scrollValue + ")");
+                logs.append("Scrolled to position: ").append(scrollValue).append("\n");
                 break;
 
             case SELECT:
+                if (step.getSelector() == null || step.getSelector().trim().isEmpty()) {
+                    throw new IllegalArgumentException("Select step requires a selector");
+                }
+                if (step.getValue() == null || step.getValue().trim().isEmpty()) {
+                    throw new IllegalArgumentException("Select step requires a value");
+                }
                 Select select = new Select(driver.findElement(By.cssSelector(step.getSelector())));
                 select.selectByValue(step.getValue());
                 logs.append("Selected option: ").append(step.getValue()).append("\n");
                 break;
         }
 
-        if (step.isCaptureScreenshot()) {
+        if (step.isCaptureScreenshot() && step.getType() != AutomationStep.StepType.SCREENSHOT) {
             String screenshotPath = webDriverService.captureScreenshot(driver, step.getCaptureSelector());
             result.getScreenshotPaths().add(screenshotPath);
             logs.append("Step screenshot captured: ").append(screenshotPath).append("\n");
         }
 
-        if (step.getWaitSeconds() > 0) {
+        if (step.getWaitSeconds() > 0 && step.getType() != AutomationStep.StepType.WAIT) {
             Thread.sleep(step.getWaitSeconds() * 1000L);
+        }
+    }
+
+    private void validateStep(AutomationStep step) {
+        if (step.getType() == null) {
+            throw new IllegalArgumentException("Step type is required");
         }
     }
 }
