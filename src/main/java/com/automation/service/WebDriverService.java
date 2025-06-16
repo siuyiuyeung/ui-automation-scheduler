@@ -1,6 +1,7 @@
 package com.automation.service;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
+import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -13,13 +14,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Service
+@Slf4j
 public class WebDriverService {
 
     @Value("${automation.screenshot.path:screenshots}")
@@ -27,6 +30,8 @@ public class WebDriverService {
 
     @Value("${automation.driver.headless:false}")
     private boolean headless;
+
+    private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
 
     public WebDriver createDriver() {
         // Suppress CDP version warnings
@@ -72,10 +77,37 @@ public class WebDriverService {
         return new ChromeDriver(options);
     }
 
-    public String captureScreenshot(WebDriver driver, String selector) throws Exception {
-        String fileName = UUID.randomUUID() + ".png";
-        Path path = Paths.get(screenshotPath, fileName);
-        Files.createDirectories(path.getParent());
+    public String captureScreenshot(WebDriver driver, String selector, String configName) throws Exception {
+        return captureScreenshot(driver, selector, configName, null);
+    }
+
+    public String captureScreenshot(WebDriver driver, String selector, String configName, Integer stepNumber) throws Exception {
+        // Sanitize config name for filename and directory
+        String sanitizedConfigName = configName.replaceAll("[^a-zA-Z0-9-_]", "_");
+
+        // Generate timestamp
+        String timestamp = LocalDateTime.now().format(TIMESTAMP_FORMAT);
+
+        // Build filename
+        StringBuilder fileNameBuilder = new StringBuilder();
+        fileNameBuilder.append(sanitizedConfigName);
+        fileNameBuilder.append("_");
+        fileNameBuilder.append(timestamp);
+
+        if (stepNumber != null) {
+            fileNameBuilder.append("_step");
+            fileNameBuilder.append(stepNumber);
+        }
+
+        fileNameBuilder.append(".png");
+
+        String fileName = fileNameBuilder.toString();
+
+        // Create subdirectory for the configuration
+        Path configDir = Paths.get(screenshotPath, sanitizedConfigName);
+        Files.createDirectories(configDir);
+
+        Path path = configDir.resolve(fileName);
 
         if (selector != null && !selector.isEmpty()) {
             try {
@@ -88,6 +120,7 @@ public class WebDriverService {
                 Files.copy(screenshot.toPath(), path);
             } catch (NoSuchElementException e) {
                 // If element not found, take full page screenshot
+                log.warn("Element not found with selector: {}. Taking full page screenshot.", selector);
                 TakesScreenshot takesScreenshot = (TakesScreenshot) driver;
                 File screenshot = takesScreenshot.getScreenshotAs(OutputType.FILE);
                 Files.copy(screenshot.toPath(), path);
@@ -98,6 +131,7 @@ public class WebDriverService {
             Files.copy(screenshot.toPath(), path);
         }
 
+        log.info("Screenshot saved: {}", path);
         return path.toString();
     }
 
