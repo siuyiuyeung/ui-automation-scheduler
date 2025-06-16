@@ -403,6 +403,7 @@ public interface AutomationResultRepository extends JpaRepository<AutomationResu
 package com.automation.service;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
+import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -415,13 +416,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Service
+@Slf4j
 public class WebDriverService {
     
     @Value("${automation.screenshot.path:screenshots}")
@@ -429,6 +432,8 @@ public class WebDriverService {
     
     @Value("${automation.driver.headless:false}")
     private boolean headless;
+    
+    private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
     
     public WebDriver createDriver() {
         // Suppress CDP version warnings
@@ -474,10 +479,37 @@ public class WebDriverService {
         return new ChromeDriver(options);
     }
     
-    public String captureScreenshot(WebDriver driver, String selector) throws Exception {
-        String fileName = UUID.randomUUID() + ".png";
-        Path path = Paths.get(screenshotPath, fileName);
-        Files.createDirectories(path.getParent());
+    public String captureScreenshot(WebDriver driver, String selector, String configName) throws Exception {
+        return captureScreenshot(driver, selector, configName, null);
+    }
+    
+    public String captureScreenshot(WebDriver driver, String selector, String configName, Integer stepNumber) throws Exception {
+        // Sanitize config name for filename and directory
+        String sanitizedConfigName = configName.replaceAll("[^a-zA-Z0-9-_]", "_");
+        
+        // Generate timestamp
+        String timestamp = LocalDateTime.now().format(TIMESTAMP_FORMAT);
+        
+        // Build filename
+        StringBuilder fileNameBuilder = new StringBuilder();
+        fileNameBuilder.append(sanitizedConfigName);
+        fileNameBuilder.append("_");
+        fileNameBuilder.append(timestamp);
+        
+        if (stepNumber != null) {
+            fileNameBuilder.append("_step");
+            fileNameBuilder.append(stepNumber);
+        }
+        
+        fileNameBuilder.append(".png");
+        
+        String fileName = fileNameBuilder.toString();
+        
+        // Create subdirectory for the configuration
+        Path configDir = Paths.get(screenshotPath, sanitizedConfigName);
+        Files.createDirectories(configDir);
+        
+        Path path = configDir.resolve(fileName);
         
         if (selector != null && !selector.isEmpty()) {
             try {
@@ -490,6 +522,7 @@ public class WebDriverService {
                 Files.copy(screenshot.toPath(), path);
             } catch (NoSuchElementException e) {
                 // If element not found, take full page screenshot
+                log.warn("Element not found with selector: {}. Taking full page screenshot.", selector);
                 TakesScreenshot takesScreenshot = (TakesScreenshot) driver;
                 File screenshot = takesScreenshot.getScreenshotAs(OutputType.FILE);
                 Files.copy(screenshot.toPath(), path);
@@ -500,6 +533,7 @@ public class WebDriverService {
             Files.copy(screenshot.toPath(), path);
         }
         
+        log.info("Screenshot saved: {}", path);
         return path.toString();
     }
     
@@ -586,6 +620,10 @@ public class AutomationService {
         // Validate step data
         validateStep(step);
         
+        // Get configuration name for screenshot naming
+        String configName = result.getConfig().getName();
+        int stepIndex = step.getOrder() + 1; // Make it 1-based for user readability
+        
         switch (step.getType()) {
             case NAVIGATE:
                 String url = step.getValue();
@@ -632,7 +670,8 @@ public class AutomationService {
                 break;
                 
             case SCREENSHOT:
-                String screenshotPath = webDriverService.captureScreenshot(driver, step.getCaptureSelector());
+                String screenshotPath = webDriverService.captureScreenshot(
+                    driver, step.getCaptureSelector(), configName, stepIndex);
                 result.getScreenshotPaths().add(screenshotPath);
                 logs.append("Screenshot captured: ").append(screenshotPath).append("\n");
                 break;
@@ -657,7 +696,8 @@ public class AutomationService {
         }
         
         if (step.isCaptureScreenshot() && step.getType() != AutomationStep.StepType.SCREENSHOT) {
-            String screenshotPath = webDriverService.captureScreenshot(driver, step.getCaptureSelector());
+            String screenshotPath = webDriverService.captureScreenshot(
+                driver, step.getCaptureSelector(), configName, stepIndex);
             result.getScreenshotPaths().add(screenshotPath);
             logs.append("Step screenshot captured: ").append(screenshotPath).append("\n");
         }
@@ -1182,6 +1222,7 @@ logging:
     org.hibernate: WARN
     org.openqa.selenium.devtools: OFF
     org.openqa.selenium.chromium: OFF
+    com.automation.service.WebDriverService: INFO
 ```
 
 ## 8. DTOs
@@ -1362,6 +1403,7 @@ public class SeleniumConfig {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UI Automation Scheduler</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="/css/style.css" rel="stylesheet">
 </head>
 <body>
@@ -1384,6 +1426,39 @@ public class SeleniumConfig {
 
         <div id="history" class="mb-5">
             <h2>Execution History</h2>
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text">Show</span>
+                        <select class="form-select" id="pageSize" onchange="changePageSize()" style="width: auto;">
+                            <option value="10">10</option>
+                            <option value="20" selected>20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        <span class="input-group-text">entries</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="statusFilter" onchange="applyFilters()">
+                        <option value="">All Status</option>
+                        <option value="SUCCESS">Success</option>
+                        <option value="FAILED">Failed</option>
+                        <option value="RUNNING">Running</option>
+                        <option value="CANCELLED">Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="configFilter" onchange="applyFilters()">
+                        <option value="">All Configurations</option>
+                    </select>
+                </div>
+                <div class="col-md-3 text-end">
+                    <button class="btn btn-sm btn-secondary" onclick="loadHistory()">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                    </button>
+                </div>
+            </div>
             <div class="table-responsive">
                 <table class="table table-striped">
                     <thead>
@@ -1397,6 +1472,17 @@ public class SeleniumConfig {
                     </thead>
                     <tbody id="historyTable"></tbody>
                 </table>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <p class="text-muted mb-0" id="historyInfo">Showing 0 to 0 of 0 entries</p>
+                </div>
+                <div class="col-md-6">
+                    <nav aria-label="History pagination">
+                        <ul class="pagination justify-content-end mb-0" id="historyPagination">
+                        </ul>
+                    </nav>
+                </div>
             </div>
         </div>
 
@@ -1503,10 +1589,17 @@ async function loadConfigs() {
     });
 }
 
-// Load history
-async function loadHistory() {
+// Pagination state
+let currentPage = 0;
+let pageSize = 20;
+let totalPages = 0;
+let totalElements = 0;
+
+// Load history with pagination
+async function loadHistory(page = 0) {
     try {
-        const response = await fetch('/api/history');
+        currentPage = page;
+        const response = await fetch(`/api/history?page=${page}&size=${pageSize}`);
         const data = await response.json();
         
         const tbody = document.getElementById('historyTable');
@@ -1517,6 +1610,11 @@ async function loadHistory() {
             console.log('Sample result:', data.content[0]);
             console.log('Start time:', data.content[0].startTime);
         }
+        
+        // Update pagination info
+        totalPages = data.totalPages;
+        totalElements = data.totalElements;
+        updatePaginationInfo(data);
         
         data.content.forEach(result => {
             let duration = 'Running...';
@@ -1571,11 +1669,95 @@ async function loadHistory() {
             `;
             tbody.innerHTML += row;
         });
+        
+        // Update pagination controls
+        updatePaginationControls();
+        
     } catch (error) {
         console.error('Error loading history:', error);
         const tbody = document.getElementById('historyTable');
         tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error loading history</td></tr>';
     }
+}
+
+// Update pagination info text
+function updatePaginationInfo(data) {
+    const start = data.number * data.size + 1;
+    const end = Math.min((data.number + 1) * data.size, data.totalElements);
+    const infoText = `Showing ${start} to ${end} of ${data.totalElements} entries`;
+    document.getElementById('historyInfo').textContent = infoText;
+}
+
+// Update pagination controls
+function updatePaginationControls() {
+    const pagination = document.getElementById('historyPagination');
+    pagination.innerHTML = '';
+    
+    // Previous button
+    const prevLi = document.createElement('li');
+    prevLi.className = `page-item ${currentPage === 0 ? 'disabled' : ''}`;
+    prevLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); loadHistory(${currentPage - 1})">Previous</a>`;
+    pagination.appendChild(prevLi);
+    
+    // Page numbers
+    const maxVisiblePages = 5;
+    let startPage = Math.max(0, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage < maxVisiblePages - 1) {
+        startPage = Math.max(0, endPage - maxVisiblePages + 1);
+    }
+    
+    // First page
+    if (startPage > 0) {
+        const firstLi = document.createElement('li');
+        firstLi.className = 'page-item';
+        firstLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); loadHistory(0)">1</a>`;
+        pagination.appendChild(firstLi);
+        
+        if (startPage > 1) {
+            const ellipsisLi = document.createElement('li');
+            ellipsisLi.className = 'page-item disabled';
+            ellipsisLi.innerHTML = '<span class="page-link">...</span>';
+            pagination.appendChild(ellipsisLi);
+        }
+    }
+    
+    // Page numbers
+    for (let i = startPage; i <= endPage; i++) {
+        const li = document.createElement('li');
+        li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+        li.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); loadHistory(${i})">${i + 1}</a>`;
+        pagination.appendChild(li);
+    }
+    
+    // Last page
+    if (endPage < totalPages - 1) {
+        if (endPage < totalPages - 2) {
+            const ellipsisLi = document.createElement('li');
+            ellipsisLi.className = 'page-item disabled';
+            ellipsisLi.innerHTML = '<span class="page-link">...</span>';
+            pagination.appendChild(ellipsisLi);
+        }
+        
+        const lastLi = document.createElement('li');
+        lastLi.className = 'page-item';
+        lastLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); loadHistory(${totalPages - 1})">${totalPages}</a>`;
+        pagination.appendChild(lastLi);
+    }
+    
+    // Next button
+    const nextLi = document.createElement('li');
+    nextLi.className = `page-item ${currentPage >= totalPages - 1 ? 'disabled' : ''}`;
+    nextLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); loadHistory(${currentPage + 1})">Next</a>`;
+    pagination.appendChild(nextLi);
+}
+
+// Change page size
+function changePageSize() {
+    pageSize = parseInt(document.getElementById('pageSize').value);
+    currentPage = 0; // Reset to first page
+    loadHistory(0);
 }
 
 // Format date time for display
@@ -2292,9 +2474,12 @@ document.getElementById('configForm').addEventListener('submit', async (e) => {
 // Initial load
 loadConfigs();
 loadHistory();
+populateConfigFilter();
 
 // Auto-refresh history every 10 seconds
-setInterval(loadHistory, 10000);
+setInterval(() => {
+    loadHistory(currentPage); // Maintain current page
+}, 10000);
 ```
 
 ### static/css/style.css
@@ -2380,21 +2565,32 @@ code {
    border-radius: 8px;
 }
 
-/* Step counter */
-.step-number {
-   position: absolute;
-   top: 5px;
-   left: 5px;
-   background: #007bff;
-   color: white;
-   width: 25px;
-   height: 25px;
-   border-radius: 50%;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   font-size: 0.875rem;
-   font-weight: bold;
+/* Pagination styles */
+.pagination {
+   margin-bottom: 0;
+}
+
+.page-link {
+   color: #007bff;
+}
+
+.page-item.active .page-link {
+   background-color: #007bff;
+   border-color: #007bff;
+}
+
+.page-item.disabled .page-link {
+   color: #6c757d;
+}
+
+/* Filter styles */
+#pageSize {
+   max-width: 80px;
+}
+
+/* History info text */
+#historyInfo {
+   line-height: 38px; /* Align with pagination height */
 }
 
 .card:hover {

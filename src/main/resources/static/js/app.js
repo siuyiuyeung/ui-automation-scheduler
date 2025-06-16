@@ -33,10 +33,17 @@ async function loadConfigs() {
     });
 }
 
-// Load history
-async function loadHistory() {
+// Pagination state
+let currentPage = 0;
+let pageSize = 20;
+let totalPages = 0;
+let totalElements = 0;
+
+// Load history with pagination
+async function loadHistory(page = 0) {
     try {
-        const response = await fetch('/api/history');
+        currentPage = page;
+        const response = await fetch(`/api/history?page=${page}&size=${pageSize}`);
         const data = await response.json();
 
         const tbody = document.getElementById('historyTable');
@@ -47,6 +54,11 @@ async function loadHistory() {
             console.log('Sample result:', data.content[0]);
             console.log('Start time:', data.content[0].startTime);
         }
+
+        // Update pagination info
+        totalPages = data.totalPages;
+        totalElements = data.totalElements;
+        updatePaginationInfo(data);
 
         data.content.forEach(result => {
             let duration = 'Running...';
@@ -101,11 +113,95 @@ async function loadHistory() {
             `;
             tbody.innerHTML += row;
         });
+
+        // Update pagination controls
+        updatePaginationControls();
+
     } catch (error) {
         console.error('Error loading history:', error);
         const tbody = document.getElementById('historyTable');
         tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error loading history</td></tr>';
     }
+}
+
+// Update pagination info text
+function updatePaginationInfo(data) {
+    const start = data.number * data.size + 1;
+    const end = Math.min((data.number + 1) * data.size, data.totalElements);
+    const infoText = `Showing ${start} to ${end} of ${data.totalElements} entries`;
+    document.getElementById('historyInfo').textContent = infoText;
+}
+
+// Update pagination controls
+function updatePaginationControls() {
+    const pagination = document.getElementById('historyPagination');
+    pagination.innerHTML = '';
+
+    // Previous button
+    const prevLi = document.createElement('li');
+    prevLi.className = `page-item ${currentPage === 0 ? 'disabled' : ''}`;
+    prevLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); loadHistory(${currentPage - 1})">Previous</a>`;
+    pagination.appendChild(prevLi);
+
+    // Page numbers
+    const maxVisiblePages = 5;
+    let startPage = Math.max(0, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage < maxVisiblePages - 1) {
+        startPage = Math.max(0, endPage - maxVisiblePages + 1);
+    }
+
+    // First page
+    if (startPage > 0) {
+        const firstLi = document.createElement('li');
+        firstLi.className = 'page-item';
+        firstLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); loadHistory(0)">1</a>`;
+        pagination.appendChild(firstLi);
+
+        if (startPage > 1) {
+            const ellipsisLi = document.createElement('li');
+            ellipsisLi.className = 'page-item disabled';
+            ellipsisLi.innerHTML = '<span class="page-link">...</span>';
+            pagination.appendChild(ellipsisLi);
+        }
+    }
+
+    // Page numbers
+    for (let i = startPage; i <= endPage; i++) {
+        const li = document.createElement('li');
+        li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+        li.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); loadHistory(${i})">${i + 1}</a>`;
+        pagination.appendChild(li);
+    }
+
+    // Last page
+    if (endPage < totalPages - 1) {
+        if (endPage < totalPages - 2) {
+            const ellipsisLi = document.createElement('li');
+            ellipsisLi.className = 'page-item disabled';
+            ellipsisLi.innerHTML = '<span class="page-link">...</span>';
+            pagination.appendChild(ellipsisLi);
+        }
+
+        const lastLi = document.createElement('li');
+        lastLi.className = 'page-item';
+        lastLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); loadHistory(${totalPages - 1})">${totalPages}</a>`;
+        pagination.appendChild(lastLi);
+    }
+
+    // Next button
+    const nextLi = document.createElement('li');
+    nextLi.className = `page-item ${currentPage >= totalPages - 1 ? 'disabled' : ''}`;
+    nextLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); loadHistory(${currentPage + 1})">Next</a>`;
+    pagination.appendChild(nextLi);
+}
+
+// Change page size
+function changePageSize() {
+    pageSize = parseInt(document.getElementById('pageSize').value);
+    currentPage = 0; // Reset to first page
+    loadHistory(0);
 }
 
 // Format date time for display
@@ -822,6 +918,9 @@ document.getElementById('configForm').addEventListener('submit', async (e) => {
 // Initial load
 loadConfigs();
 loadHistory();
+populateConfigFilter();
 
 // Auto-refresh history every 10 seconds
-setInterval(loadHistory, 10000);
+setInterval(() => {
+    loadHistory(currentPage); // Maintain current page
+}, 10000);

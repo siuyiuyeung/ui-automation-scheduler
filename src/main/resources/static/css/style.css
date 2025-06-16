@@ -79,21 +79,32 @@ code {
     border-radius: 8px;
 }
 
-/* Step counter */
-.step-number {
-    position: absolute;
-    top: 5px;
-    left: 5px;
-    background: #007bff;
-    color: white;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.875rem;
-    font-weight: bold;
+/* Pagination styles */
+.pagination {
+    margin-bottom: 0;
+}
+
+.page-link {
+    color: #007bff;
+}
+
+.page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.page-item.disabled .page-link {
+    color: #6c757d;
+}
+
+/* Filter styles */
+#pageSize {
+    max-width: 80px;
+}
+
+/* History info text */
+#historyInfo {
+    line-height: 38px; /* Align with pagination height */
 }
 
 .card:hover {
