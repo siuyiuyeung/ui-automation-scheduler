@@ -67,6 +67,10 @@ public class AutomationService {
         // Validate step data
         validateStep(step);
 
+        // Get configuration name for screenshot naming
+        String configName = result.getConfig().getName();
+        int stepIndex = step.getOrder() + 1; // Make it 1-based for user readability
+
         switch (step.getType()) {
             case NAVIGATE:
                 String url = step.getValue();
@@ -113,7 +117,8 @@ public class AutomationService {
                 break;
 
             case SCREENSHOT:
-                String screenshotPath = webDriverService.captureScreenshot(driver, step.getCaptureSelector());
+                String screenshotPath = webDriverService.captureScreenshot(
+                        driver, step.getCaptureSelector(), configName, stepIndex);
                 result.getScreenshotPaths().add(screenshotPath);
                 logs.append("Screenshot captured: ").append(screenshotPath).append("\n");
                 break;
@@ -138,7 +143,8 @@ public class AutomationService {
         }
 
         if (step.isCaptureScreenshot() && step.getType() != AutomationStep.StepType.SCREENSHOT) {
-            String screenshotPath = webDriverService.captureScreenshot(driver, step.getCaptureSelector());
+            String screenshotPath = webDriverService.captureScreenshot(
+                    driver, step.getCaptureSelector(), configName, stepIndex);
             result.getScreenshotPaths().add(screenshotPath);
             logs.append("Step screenshot captured: ").append(screenshotPath).append("\n");
         }
