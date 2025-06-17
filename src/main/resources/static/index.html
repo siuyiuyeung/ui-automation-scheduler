@@ -56,7 +56,7 @@
                 </select>
             </div>
             <div class="col-md-3 text-end">
-                <button class="btn btn-sm btn-secondary" onclick="loadHistory()">
+                <button class="btn btn-sm btn-secondary" onclick="loadHistory(currentPage)">
                     <i class="bi bi-arrow-clockwise"></i> Refresh
                 </button>
             </div>
@@ -72,7 +72,11 @@
                     <th>Actions</th>
                 </tr>
                 </thead>
-                <tbody id="historyTable"></tbody>
+                <tbody id="historyTable">
+                <tr>
+                    <td colspan="5" class="text-center">Loading...</td>
+                </tr>
+                </tbody>
             </table>
         </div>
         <div class="row mt-3">

@@ -52,102 +52,102 @@ ui-automation-scheduler/
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
-   <modelVersion>4.0.0</modelVersion>
-
-   <parent>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-parent</artifactId>
-      <version>3.3.0</version>
-      <relativePath/>
-   </parent>
-
-   <groupId>com.automation</groupId>
-   <artifactId>ui-automation-scheduler</artifactId>
-   <version>1.0.0</version>
-   <name>UI Automation Scheduler</name>
-
-   <properties>
-      <java.version>24</java.version>
-      <selenium.version>4.20.0</selenium.version>
-   </properties>
-
-   <dependencies>
-      <!-- Spring Boot Starters -->
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-web</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-data-jpa</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-thymeleaf</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-validation</artifactId>
-      </dependency>
-
-      <!-- No Quartz dependency needed, using Spring's built-in scheduling -->
-
-      <!-- Database -->
-      <dependency>
-         <groupId>com.h2database</groupId>
-         <artifactId>h2</artifactId>
-         <scope>runtime</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.postgresql</groupId>
-         <artifactId>postgresql</artifactId>
-         <scope>runtime</scope>
-      </dependency>
-
-      <!-- Selenium -->
-      <dependency>
-         <groupId>org.seleniumhq.selenium</groupId>
-         <artifactId>selenium-java</artifactId>
-         <version>${selenium.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.seleniumhq.selenium</groupId>
-         <artifactId>selenium-devtools-v129</artifactId>
-         <version>${selenium.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>io.github.bonigarcia</groupId>
-         <artifactId>webdrivermanager</artifactId>
-         <version>5.8.0</version>
-      </dependency>
-
-      <!-- Utilities -->
-      <dependency>
-         <groupId>org.projectlombok</groupId>
-         <artifactId>lombok</artifactId>
-         <optional>true</optional>
-      </dependency>
-      <dependency>
-         <groupId>com.fasterxml.jackson.datatype</groupId>
-         <artifactId>jackson-datatype-jsr310</artifactId>
-      </dependency>
-
-      <!-- Test -->
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-test</artifactId>
-         <scope>test</scope>
-      </dependency>
-   </dependencies>
-
-   <build>
-      <plugins>
-         <plugin>
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.0</version>
+        <relativePath/>
+    </parent>
+    
+    <groupId>com.automation</groupId>
+    <artifactId>ui-automation-scheduler</artifactId>
+    <version>1.0.0</version>
+    <name>UI Automation Scheduler</name>
+    
+    <properties>
+        <java.version>24</java.version>
+        <selenium.version>4.20.0</selenium.version>
+    </properties>
+    
+    <dependencies>
+        <!-- Spring Boot Starters -->
+        <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-maven-plugin</artifactId>
-         </plugin>
-      </plugins>
-   </build>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        
+        <!-- No Quartz dependency needed, using Spring's built-in scheduling -->
+        
+        <!-- Database -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        
+        <!-- Selenium -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>${selenium.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-devtools-v129</artifactId>
+            <version>${selenium.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.bonigarcia</groupId>
+            <artifactId>webdrivermanager</artifactId>
+            <version>5.8.0</version>
+        </dependency>
+        
+        <!-- Utilities -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+        
+        <!-- Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>
 ```
 
@@ -1454,7 +1454,7 @@ public class SeleniumConfig {
                     </select>
                 </div>
                 <div class="col-md-3 text-end">
-                    <button class="btn btn-sm btn-secondary" onclick="loadHistory()">
+                    <button class="btn btn-sm btn-secondary" onclick="loadHistory(currentPage)">
                         <i class="bi bi-arrow-clockwise"></i> Refresh
                     </button>
                 </div>
@@ -1470,7 +1470,11 @@ public class SeleniumConfig {
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="historyTable"></tbody>
+                    <tbody id="historyTable">
+                        <tr>
+                            <td colspan="5" class="text-center">Loading...</td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
             <div class="row mt-3">
@@ -1795,6 +1799,246 @@ function formatDuration(milliseconds) {
         return `${minutes}m ${seconds % 60}s`;
     } else {
         return `${seconds}s`;
+    }
+}
+
+// Helper functions
+function getStatusColor(status) {
+    switch(status) {
+        case 'SUCCESS': return 'success';
+        case 'FAILED': return 'danger';
+        case 'RUNNING': return 'primary';
+        default: return 'secondary';
+    }
+}
+
+// Pagination state
+let currentPage = 0;
+let pageSize = 20;
+let totalPages = 0;
+let totalElements = 0;
+
+// Update pagination info text
+function updatePaginationInfo(data) {
+    const start = data.totalElements > 0 ? (data.number * data.size + 1) : 0;
+    const end = Math.min((data.number + 1) * data.size, data.totalElements);
+    const infoText = `Showing ${start} to ${end} of ${data.totalElements} entries`;
+    document.getElementById('historyInfo').textContent = infoText;
+}
+
+// Update pagination controls
+function updatePaginationControls() {
+    const pagination = document.getElementById('historyPagination');
+    pagination.innerHTML = '';
+    
+    if (totalPages <= 1) {
+        return; // No pagination needed
+    }
+    
+    // Previous button
+    const prevLi = document.createElement('li');
+    prevLi.className = `page-item ${currentPage === 0 ? 'disabled' : ''}`;
+    if (currentPage > 0) {
+        prevLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); loadHistory(${currentPage - 1})">Previous</a>`;
+    } else {
+        prevLi.innerHTML = `<span class="page-link">Previous</span>`;
+    }
+    pagination.appendChild(prevLi);
+    
+    // Page numbers
+    const maxVisiblePages = 5;
+    let startPage = Math.max(0, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage < maxVisiblePages - 1) {
+        startPage = Math.max(0, endPage - maxVisiblePages + 1);
+    }
+    
+    // First page
+    if (startPage > 0) {
+        const firstLi = document.createElement('li');
+        firstLi.className = 'page-item';
+        firstLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); loadHistory(0)">1</a>`;
+        pagination.appendChild(firstLi);
+        
+        if (startPage > 1) {
+            const ellipsisLi = document.createElement('li');
+            ellipsisLi.className = 'page-item disabled';
+            ellipsisLi.innerHTML = '<span class="page-link">...</span>';
+            pagination.appendChild(ellipsisLi);
+        }
+    }
+    
+    // Page numbers
+    for (let i = startPage; i <= endPage; i++) {
+        const li = document.createElement('li');
+        li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+        li.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); loadHistory(${i})">${i + 1}</a>`;
+        pagination.appendChild(li);
+    }
+    
+    // Last page
+    if (endPage < totalPages - 1) {
+        if (endPage < totalPages - 2) {
+            const ellipsisLi = document.createElement('li');
+            ellipsisLi.className = 'page-item disabled';
+            ellipsisLi.innerHTML = '<span class="page-link">...</span>';
+            pagination.appendChild(ellipsisLi);
+        }
+        
+        const lastLi = document.createElement('li');
+        lastLi.className = 'page-item';
+        lastLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); loadHistory(${totalPages - 1})">${totalPages}</a>`;
+        pagination.appendChild(lastLi);
+    }
+    
+    // Next button
+    const nextLi = document.createElement('li');
+    nextLi.className = `page-item ${currentPage >= totalPages - 1 ? 'disabled' : ''}`;
+    if (currentPage < totalPages - 1) {
+        nextLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); loadHistory(${currentPage + 1})">Next</a>`;
+    } else {
+        nextLi.innerHTML = `<span class="page-link">Next</span>`;
+    }
+    pagination.appendChild(nextLi);
+}
+
+// Load history with pagination and filters
+async function loadHistory(page = 0) {
+    try {
+        currentPage = page;
+        
+        // Build query parameters
+        let queryParams = `page=${page}&size=${pageSize}`;
+        
+        const statusFilter = document.getElementById('statusFilter');
+        if (statusFilter && statusFilter.value) {
+            queryParams += `&status=${statusFilter.value}`;
+        }
+        
+        const configFilter = document.getElementById('configFilter');
+        if (configFilter && configFilter.value) {
+            queryParams += `&configId=${configFilter.value}`;
+        }
+        
+        console.log('Loading history with params:', queryParams);
+        
+        const response = await fetch(`/api/history?${queryParams}`);
+        const data = await response.json();
+        
+        console.log('History data:', data);
+        
+        const tbody = document.getElementById('historyTable');
+        tbody.innerHTML = '';
+        
+        // Update pagination info
+        totalPages = data.totalPages || 0;
+        totalElements = data.totalElements || 0;
+        updatePaginationInfo(data);
+        
+        if (!data.content || data.content.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center">No results found</td></tr>';
+        } else {
+            data.content.forEach(result => {
+                let duration = 'Running...';
+                let startTimeStr = 'N/A';
+                
+                if (result.startTime) {
+                    // Handle different date formats
+                    let startTime;
+                    if (Array.isArray(result.startTime)) {
+                        // Handle array format [year, month, day, hour, minute, second, nano]
+                        const [year, month, day, hour, minute, second] = result.startTime;
+                        startTime = new Date(year, month - 1, day, hour, minute, second);
+                    } else {
+                        // Handle ISO string format
+                        startTime = new Date(result.startTime);
+                    }
+                    
+                    if (!isNaN(startTime.getTime())) {
+                        startTimeStr = formatDateTime(startTime);
+                        
+                        if (result.endTime) {
+                            let endTime;
+                            if (Array.isArray(result.endTime)) {
+                                const [year, month, day, hour, minute, second] = result.endTime;
+                                endTime = new Date(year, month - 1, day, hour, minute, second);
+                            } else {
+                                endTime = new Date(result.endTime);
+                            }
+                            
+                            if (!isNaN(endTime.getTime())) {
+                                const durationMs = endTime.getTime() - startTime.getTime();
+                                duration = formatDuration(durationMs);
+                            }
+                        }
+                    }
+                }
+                
+                const row = `
+                    <tr>
+                        <td>${result.configName || 'Unknown'}</td>
+                        <td>
+                            <span class="badge bg-${getStatusColor(result.status)}">
+                                ${result.status}
+                            </span>
+                        </td>
+                        <td>${startTimeStr}</td>
+                        <td>${duration}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="viewDetails(${result.id})">Details</button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+        
+        // Update pagination controls
+        updatePaginationControls();
+        
+    } catch (error) {
+        console.error('Error loading history:', error);
+        const tbody = document.getElementById('historyTable');
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error loading history: ' + error.message + '</td></tr>';
+    }
+}
+
+// Change page size
+function changePageSize() {
+    const pageSizeElement = document.getElementById('pageSize');
+    if (pageSizeElement) {
+        pageSize = parseInt(pageSizeElement.value);
+        currentPage = 0; // Reset to first page
+        loadHistory(0);
+    }
+}
+
+// Apply filters
+function applyFilters() {
+    currentPage = 0; // Reset to first page when filtering
+    loadHistory(0);
+}
+
+// Populate config filter dropdown
+async function populateConfigFilter() {
+    try {
+        const response = await fetch('/api/automation/configs');
+        const configs = await response.json();
+        
+        const select = document.getElementById('configFilter');
+        if (select) {
+            select.innerHTML = '<option value="">All Configurations</option>';
+            
+            configs.forEach(config => {
+                const option = document.createElement('option');
+                option.value = config.id;
+                option.textContent = config.name;
+                select.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Error loading configs for filter:', error);
     }
 }
 
@@ -2471,83 +2715,86 @@ document.getElementById('configForm').addEventListener('submit', async (e) => {
     }
 });
 
-// Initial load
-loadConfigs();
-loadHistory();
-populateConfigFilter();
+// Wait for DOM to be ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Initial load
+    loadConfigs();
+    loadHistory();
+    populateConfigFilter();
 
-// Auto-refresh history every 10 seconds
-setInterval(() => {
-    loadHistory(currentPage); // Maintain current page
-}, 10000);
+    // Auto-refresh history every 10 seconds
+    setInterval(() => {
+        loadHistory(currentPage); // Maintain current page
+    }, 10000);
+});
 ```
 
 ### static/css/style.css
 ```css
 body {
-   background-color: #f8f9fa;
+    background-color: #f8f9fa;
 }
 
 .card {
-   box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-   transition: transform 0.2s;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: transform 0.2s;
 }
 
 .card:hover {
-   transform: translateY(-5px);
+    transform: translateY(-5px);
 }
 
 .navbar-brand {
-   font-weight: bold;
+    font-weight: bold;
 }
 
 #stepsContainer .card {
-   background-color: #f1f3f5;
+    background-color: #f1f3f5;
 }
 
 .table {
-   background-color: white;
+    background-color: white;
 }
 
 .badge {
-   padding: 0.5em 1em;
+    padding: 0.5em 1em;
 }
 
 /* Button spacing */
 .card-body .btn {
-   margin: 2px;
+    margin: 2px;
 }
 
 /* Make configuration cards more compact */
 .card-body {
-   padding: 1rem;
+    padding: 1rem;
 }
 
 /* Modal styles */
 .modal-xl {
-   max-width: 90%;
+    max-width: 90%;
 }
 
 .img-thumbnail {
-   transition: transform 0.2s;
+    transition: transform 0.2s;
 }
 
 .img-thumbnail:hover {
-   transform: scale(1.05);
+    transform: scale(1.05);
 }
 
 pre {
-   white-space: pre-wrap;
-   word-wrap: break-word;
-   font-size: 0.875rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 0.875rem;
 }
 
 code {
-   font-size: 0.875rem;
-   color: #d63384;
-   background-color: #f8f9fa;
-   padding: 2px 4px;
-   border-radius: 3px;
+    font-size: 0.875rem;
+    color: #d63384;
+    background-color: #f8f9fa;
+    padding: 2px 4px;
+    border-radius: 3px;
 }
 
 /* Status badge colors */
@@ -2560,84 +2807,84 @@ code {
 
 /* Form improvements */
 #create {
-   background-color: #f8f9fa;
-   padding: 20px;
-   border-radius: 8px;
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
 }
 
 /* Pagination styles */
 .pagination {
-   margin-bottom: 0;
+    margin-bottom: 0;
 }
 
 .page-link {
-   color: #007bff;
+    color: #007bff;
 }
 
 .page-item.active .page-link {
-   background-color: #007bff;
-   border-color: #007bff;
+    background-color: #007bff;
+    border-color: #007bff;
 }
 
 .page-item.disabled .page-link {
-   color: #6c757d;
+    color: #6c757d;
 }
 
 /* Filter styles */
 #pageSize {
-   max-width: 80px;
+    max-width: 80px;
 }
 
 /* History info text */
 #historyInfo {
-   line-height: 38px; /* Align with pagination height */
+    line-height: 38px; /* Align with pagination height */
 }
 
 .card:hover {
-   transform: translateY(-5px);
+    transform: translateY(-5px);
 }
 
 .navbar-brand {
-   font-weight: bold;
+    font-weight: bold;
 }
 
 #stepsContainer .card {
-   background-color: #f1f3f5;
+    background-color: #f1f3f5;
 }
 
 .table {
-   background-color: white;
+    background-color: white;
 }
 
 .badge {
-   padding: 0.5em 1em;
+    padding: 0.5em 1em;
 }
 
 /* Modal styles */
 .modal-xl {
-   max-width: 90%;
+    max-width: 90%;
 }
 
 .img-thumbnail {
-   transition: transform 0.2s;
+    transition: transform 0.2s;
 }
 
 .img-thumbnail:hover {
-   transform: scale(1.05);
+    transform: scale(1.05);
 }
 
 pre {
-   white-space: pre-wrap;
-   word-wrap: break-word;
-   font-size: 0.875rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 0.875rem;
 }
 
 code {
-   font-size: 0.875rem;
-   color: #d63384;
-   background-color: #f8f9fa;
-   padding: 2px 4px;
-   border-radius: 3px;
+    font-size: 0.875rem;
+    color: #d63384;
+    background-color: #f8f9fa;
+    padding: 2px 4px;
+    border-radius: 3px;
 }
 
 /* Status badge colors */

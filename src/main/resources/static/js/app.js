@@ -242,6 +242,240 @@ function formatDuration(milliseconds) {
     }
 }
 
+// Helper functions
+function getStatusColor(status) {
+    switch(status) {
+        case 'SUCCESS': return 'success';
+        case 'FAILED': return 'danger';
+        case 'RUNNING': return 'primary';
+        default: return 'secondary';
+    }
+}
+
+// Update pagination info text
+function updatePaginationInfo(data) {
+    const start = data.totalElements > 0 ? (data.number * data.size + 1) : 0;
+    const end = Math.min((data.number + 1) * data.size, data.totalElements);
+    const infoText = `Showing ${start} to ${end} of ${data.totalElements} entries`;
+    document.getElementById('historyInfo').textContent = infoText;
+}
+
+// Update pagination controls
+function updatePaginationControls() {
+    const pagination = document.getElementById('historyPagination');
+    pagination.innerHTML = '';
+
+    if (totalPages <= 1) {
+        return; // No pagination needed
+    }
+
+    // Previous button
+    const prevLi = document.createElement('li');
+    prevLi.className = `page-item ${currentPage === 0 ? 'disabled' : ''}`;
+    if (currentPage > 0) {
+        prevLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); loadHistory(${currentPage - 1})">Previous</a>`;
+    } else {
+        prevLi.innerHTML = `<span class="page-link">Previous</span>`;
+    }
+    pagination.appendChild(prevLi);
+
+    // Page numbers
+    const maxVisiblePages = 5;
+    let startPage = Math.max(0, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage < maxVisiblePages - 1) {
+        startPage = Math.max(0, endPage - maxVisiblePages + 1);
+    }
+
+    // First page
+    if (startPage > 0) {
+        const firstLi = document.createElement('li');
+        firstLi.className = 'page-item';
+        firstLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); loadHistory(0)">1</a>`;
+        pagination.appendChild(firstLi);
+
+        if (startPage > 1) {
+            const ellipsisLi = document.createElement('li');
+            ellipsisLi.className = 'page-item disabled';
+            ellipsisLi.innerHTML = '<span class="page-link">...</span>';
+            pagination.appendChild(ellipsisLi);
+        }
+    }
+
+    // Page numbers
+    for (let i = startPage; i <= endPage; i++) {
+        const li = document.createElement('li');
+        li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+        li.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); loadHistory(${i})">${i + 1}</a>`;
+        pagination.appendChild(li);
+    }
+
+    // Last page
+    if (endPage < totalPages - 1) {
+        if (endPage < totalPages - 2) {
+            const ellipsisLi = document.createElement('li');
+            ellipsisLi.className = 'page-item disabled';
+            ellipsisLi.innerHTML = '<span class="page-link">...</span>';
+            pagination.appendChild(ellipsisLi);
+        }
+
+        const lastLi = document.createElement('li');
+        lastLi.className = 'page-item';
+        lastLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); loadHistory(${totalPages - 1})">${totalPages}</a>`;
+        pagination.appendChild(lastLi);
+    }
+
+    // Next button
+    const nextLi = document.createElement('li');
+    nextLi.className = `page-item ${currentPage >= totalPages - 1 ? 'disabled' : ''}`;
+    if (currentPage < totalPages - 1) {
+        nextLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); loadHistory(${currentPage + 1})">Next</a>`;
+    } else {
+        nextLi.innerHTML = `<span class="page-link">Next</span>`;
+    }
+    pagination.appendChild(nextLi);
+}
+
+// Load history with pagination and filters
+async function loadHistory(page = 0) {
+    try {
+        currentPage = page;
+
+        // Build query parameters
+        let queryParams = `page=${page}&size=${pageSize}`;
+
+        const statusFilter = document.getElementById('statusFilter');
+        if (statusFilter && statusFilter.value) {
+            queryParams += `&status=${statusFilter.value}`;
+        }
+
+        const configFilter = document.getElementById('configFilter');
+        if (configFilter && configFilter.value) {
+            queryParams += `&configId=${configFilter.value}`;
+        }
+
+        console.log('Loading history with params:', queryParams);
+
+        const response = await fetch(`/api/history?${queryParams}`);
+        const data = await response.json();
+
+        console.log('History data:', data);
+
+        const tbody = document.getElementById('historyTable');
+        tbody.innerHTML = '';
+
+        // Update pagination info
+        totalPages = data.totalPages || 0;
+        totalElements = data.totalElements || 0;
+        updatePaginationInfo(data);
+
+        if (!data.content || data.content.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center">No results found</td></tr>';
+        } else {
+            data.content.forEach(result => {
+                let duration = 'Running...';
+                let startTimeStr = 'N/A';
+
+                if (result.startTime) {
+                    // Handle different date formats
+                    let startTime;
+                    if (Array.isArray(result.startTime)) {
+                        // Handle array format [year, month, day, hour, minute, second, nano]
+                        const [year, month, day, hour, minute, second] = result.startTime;
+                        startTime = new Date(year, month - 1, day, hour, minute, second);
+                    } else {
+                        // Handle ISO string format
+                        startTime = new Date(result.startTime);
+                    }
+
+                    if (!isNaN(startTime.getTime())) {
+                        startTimeStr = formatDateTime(startTime);
+
+                        if (result.endTime) {
+                            let endTime;
+                            if (Array.isArray(result.endTime)) {
+                                const [year, month, day, hour, minute, second] = result.endTime;
+                                endTime = new Date(year, month - 1, day, hour, minute, second);
+                            } else {
+                                endTime = new Date(result.endTime);
+                            }
+
+                            if (!isNaN(endTime.getTime())) {
+                                const durationMs = endTime.getTime() - startTime.getTime();
+                                duration = formatDuration(durationMs);
+                            }
+                        }
+                    }
+                }
+
+                const row = `
+                    <tr>
+                        <td>${result.configName || 'Unknown'}</td>
+                        <td>
+                            <span class="badge bg-${getStatusColor(result.status)}">
+                                ${result.status}
+                            </span>
+                        </td>
+                        <td>${startTimeStr}</td>
+                        <td>${duration}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="viewDetails(${result.id})">Details</button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // Update pagination controls
+        updatePaginationControls();
+
+    } catch (error) {
+        console.error('Error loading history:', error);
+        const tbody = document.getElementById('historyTable');
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error loading history: ' + error.message + '</td></tr>';
+    }
+}
+
+// Change page size
+function changePageSize() {
+    const pageSizeElement = document.getElementById('pageSize');
+    if (pageSizeElement) {
+        pageSize = parseInt(pageSizeElement.value);
+        currentPage = 0; // Reset to first page
+        loadHistory(0);
+    }
+}
+
+// Apply filters
+function applyFilters() {
+    currentPage = 0; // Reset to first page when filtering
+    loadHistory(0);
+}
+
+// Populate config filter dropdown
+async function populateConfigFilter() {
+    try {
+        const response = await fetch('/api/automation/configs');
+        const configs = await response.json();
+
+        const select = document.getElementById('configFilter');
+        if (select) {
+            select.innerHTML = '<option value="">All Configurations</option>';
+
+            configs.forEach(config => {
+                const option = document.createElement('option');
+                option.value = config.id;
+                option.textContent = config.name;
+                select.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Error loading configs for filter:', error);
+    }
+}
+
 async function viewDetails(resultId) {
     try {
         const response = await fetch(`/api/history/${resultId}`);
@@ -915,12 +1149,15 @@ document.getElementById('configForm').addEventListener('submit', async (e) => {
     }
 });
 
-// Initial load
-loadConfigs();
-loadHistory();
-populateConfigFilter();
+// Wait for DOM to be ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Initial load
+    loadConfigs();
+    loadHistory();
+    populateConfigFilter();
 
-// Auto-refresh history every 10 seconds
-setInterval(() => {
-    loadHistory(currentPage); // Maintain current page
-}, 10000);
+    // Auto-refresh history every 10 seconds
+    setInterval(() => {
+        loadHistory(currentPage); // Maintain current page
+    }, 10000);
+});
